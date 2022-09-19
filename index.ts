@@ -33,6 +33,7 @@ interface Page {
 export interface MpaOptions {
   /**
    * whether to print log
+   * @default true
    */
   verbose?: boolean,
   /**
