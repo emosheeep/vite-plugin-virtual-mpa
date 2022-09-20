@@ -1,7 +1,8 @@
+# 1.0.1
+
+- More friendly typescript type hints
 
 # 1.0.0
-
-## Features
 
 - Support for virtual html entry file, output multiple files using a single template
 - Support ejs engine.
