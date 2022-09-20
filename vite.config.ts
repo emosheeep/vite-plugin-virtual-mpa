@@ -1,15 +1,19 @@
 import { defineConfig } from 'vite';
-import { dependencies } from './package.json';
+import { externals } from 'rollup-plugin-node-externals';
 
 export default defineConfig({
+  plugins: [
+    {
+      enforce: 'pre',
+      ...externals({
+        deps: true,
+        devDeps: true,
+        peerDeps: true,
+      }),
+    },
+  ],
   build: {
     minify: false,
-    rollupOptions: {
-      external: [
-        ...Object.keys(dependencies),
-        'fs',
-      ],
-    },
     lib: {
       fileName: 'index',
       entry: 'index.ts',

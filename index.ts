@@ -6,7 +6,9 @@ import history, { Rewrite } from 'connect-history-api-fallback';
 
 const bodyInject = /<\/body>/;
 
-interface Page {
+type TplStr<T extends string> = T extends `/${infer P}` ? TplStr<P> : T extends `${infer Q}.html` ? TplStr<Q> : `${T}.html`
+
+interface Page<Filename extends string, Tpl extends string> {
   /**
    * Required page name.
    */
@@ -15,11 +17,11 @@ interface Page {
    * Relative path to the output directory, which should end with .html
    * @default `${name}.html`
    */
-  filename?: `${string}.html`;
+  filename?: TplStr<Filename>;
   /**
    * Higher priority template file, which will overwrite the default template.
    */
-  template?: `${string}.html`;
+  template?: TplStr<Tpl>;
   /**
    * Entry file that will append to body. which you should remove from the html template file.
    */
@@ -30,7 +32,7 @@ interface Page {
   data?: Record<string, any>,
 }
 
-export interface MpaOptions {
+export interface MpaOptions<T extends string, T1 extends string, T2 extends string> {
   /**
    * whether to print log
    * @default true
@@ -40,7 +42,7 @@ export interface MpaOptions {
    * default template file
    * @default index.html
    */
-  template?: `${string}.html`;
+  template?: TplStr<T>,
   /**
    * Configure your rewrite rules, only proceed fallback html requests.
    * further: https://github.com/bripkens/connect-history-api-fallback
@@ -49,10 +51,16 @@ export interface MpaOptions {
   /**
    * your MPA core configurations
    */
-  pages: Array<Page>
+  pages: Array<Page<T1, T2>>
 }
 
-export function createMpaPlugin(config: MpaOptions): Plugin {
+export function createMpaPlugin<
+  T extends string,
+  T1 extends string,
+  T2 extends string
+>(
+  config: MpaOptions<T, T1, T2>,
+): Plugin {
   const {
     template = 'index.html',
     verbose = true,
@@ -61,10 +69,13 @@ export function createMpaPlugin(config: MpaOptions): Plugin {
   } = config;
 
   const input: Record<string, string> = {};
-  const pageMap: Record<string, Page> = {};
+  const pageMap: Record<string, Page<T1, T2>> = {};
 
   for (const page of pages) {
     const entryPath = page.filename || `${page.name}.html`;
+    if (entryPath.startsWith('/')) {
+      throw new Error(`[${pluginName}]: Make sure the path relative, received '${entryPath}'`);
+    }
     input[page.name] = entryPath;
     pageMap[entryPath] = page;
   }
@@ -162,26 +173,39 @@ export function createMpaPlugin(config: MpaOptions): Plugin {
           return next();
         }
 
-        const relativePath = req.url!.replace(normalizePath(`/${base}/`), '');
+        const url = req.url!;
 
-        if (!pageMap[relativePath]) {
-          const filePath = normalizePath(`/${base}/${relativePath}`);
-          res.statusCode = 404;
-          res.write(`[${pluginName}]: Missing corresponding file '${filePath}'`);
+        const fileName = url!.replace(normalizePath(`/${base}/`), '');
+
+        if (!pageMap[fileName]) {
+          res.write(`[${pluginName}]: Missing corresponding entry file '${normalizePath(`/${base}/${fileName}`)}'`);
           res.end();
           return;
         }
 
         res.end(
           await transformIndexHtml(
-            req.originalUrl!,
+            url,
             transform(
-              await pluginContainer.load(relativePath) as string,
-              relativePath,
+              await pluginContainer.load(fileName) as string,
+              fileName,
             ),
+            req.originalUrl,
           ),
         );
       });
     },
   };
 }
+
+// // This is for type declaration testing.
+// /* @__PURE__ */createMpaPlugin({
+//   template: 'na.html',
+//   pages: [
+//     {
+//       name: '123',
+//       filename: '////av.abv.v.html.html',
+//       template: 'a.b.v',
+//     },
+//   ],
+// });
