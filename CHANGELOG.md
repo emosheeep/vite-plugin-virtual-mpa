@@ -1,3 +1,10 @@
+# 1.1.0
+
+- Some backend logic is added to make the proxy work correctly
+- Fix the warning about `Could not auto-determine entry point...` by add entry path to `optimizeDeps.entries`
+- More friendly error/log print
+- Improved documentation
+
 # 1.0.1
 
 - More friendly typescript type hints

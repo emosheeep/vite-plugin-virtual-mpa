@@ -1,18 +1,21 @@
 import { name as pluginName } from './package.json';
 import { Plugin, ResolvedConfig, normalizePath } from 'vite';
 import { readFileSync } from 'fs';
-import ejs from 'ejs';
 import history, { Rewrite } from 'connect-history-api-fallback';
+import color from 'cli-color';
+import ejs from 'ejs';
 
 const bodyInject = /<\/body>/;
+const issuePath = color.blue('https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/new');
 
 type TplStr<T extends string> = T extends `/${infer P}` ? TplStr<P> : T extends `${infer Q}.html` ? TplStr<Q> : `${T}.html`
 
-interface Page<Filename extends string, Tpl extends string> {
+interface Page<Name extends string, Filename extends string, Tpl extends string> {
   /**
-   * Required page name.
+   * Required. Name is used to generate default rewrite rules, it just a common string and please don't include '/'.
+   * You can use filename option not name option if you want to customize the path of generated files.
    */
-  name: string;
+  name: Name extends `${string}/${string}` ? never : Name;
   /**
    * Relative path to the output directory, which should end with .html
    * @default `${name}.html`
@@ -25,14 +28,14 @@ interface Page<Filename extends string, Tpl extends string> {
   /**
    * Entry file that will append to body. which you should remove from the html template file.
    */
-  entry?: string;
+  entry?: `/${string}`;
   /**
    * Data to inject with ejs.
    */
   data?: Record<string, any>,
 }
 
-export interface MpaOptions<T extends string, T1 extends string, T2 extends string> {
+export interface MpaOptions<T extends string, T1 extends string, T2 extends string, T3 extends string> {
   /**
    * whether to print log
    * @default true
@@ -51,15 +54,16 @@ export interface MpaOptions<T extends string, T1 extends string, T2 extends stri
   /**
    * your MPA core configurations
    */
-  pages: Array<Page<T1, T2>>
+  pages: Array<Page<T1, T2, T3>>
 }
 
 export function createMpaPlugin<
   T extends string,
   T1 extends string,
-  T2 extends string
+  T2 extends string,
+  T3 extends string,
 >(
-  config: MpaOptions<T, T1, T2>,
+  config: MpaOptions<T, T1, T2, T3>,
 ): Plugin {
   const {
     template = 'index.html',
@@ -68,23 +72,29 @@ export function createMpaPlugin<
     rewrites,
   } = config;
 
-  const input: Record<string, string> = {};
-  const pageMap: Record<string, Page<T1, T2>> = {};
+  const inputMap: Record<string, string> = {};
+  const virtualPageMap: Record<string, Page<T1, T2, T3>> = {};
 
   for (const page of pages) {
     const entryPath = page.filename || `${page.name}.html`;
     if (entryPath.startsWith('/')) {
       throw new Error(`[${pluginName}]: Make sure the path relative, received '${entryPath}'`);
     }
-    input[page.name] = entryPath;
-    pageMap[entryPath] = page;
+    if (page.name.includes('/')) {
+      throw new Error(`[${pluginName}]: Page name shouldn't include '/', received '${page.name}'`);
+    }
+    if (page.entry && !page.entry.startsWith('/')) {
+      throw new Error(`[${pluginName}]: Entry must be an absolute path relative to the project root, received '${page.name}'`);
+    }
+    virtualPageMap[entryPath] = page;
+    inputMap[page.name] = entryPath;
   }
 
   /**
    * 模板文件处理
    */
   function transform(fileContent, id) {
-    const page = pageMap[id];
+    const page = virtualPageMap[id];
     if (!page) return fileContent;
 
     return ejs.render(
@@ -105,21 +115,33 @@ export function createMpaPlugin<
     name: pluginName,
     config() {
       return {
+        appType: 'mpa',
+        clearScreen: false,
+        optimizeDeps: {
+          entries: pages
+            .map(v => v.entry)
+            .filter(v => !!v) as string[],
+        },
         build: {
           rollupOptions: {
-            input,
+            input: inputMap,
           },
         },
       };
     },
     configResolved(config) {
       userConfig = config;
+      if (verbose) {
+        const colorProcess = path => normalizePath(`<${color.blue(config.build.outDir)}>/${color.green(path)}`);
+        const inputFiles = Object.values(inputMap).map(colorProcess);
+        console.log(`[${pluginName}]: Generated virtual files: \n${inputFiles.join('\n')}`);
+      }
     },
     /**
      * 拦截html请求
      */
     resolveId(id, importer, options) {
-      if (options.isEntry && pageMap[id]) {
+      if (options.isEntry && virtualPageMap[id]) {
         return id;
       }
     },
@@ -127,43 +149,32 @@ export function createMpaPlugin<
      * 根据配置映射html文件
      */
     load(id) {
-      const page = pageMap[id];
+      const page = virtualPageMap[id];
       if (!page) return null;
       return readFileSync(page.template || template, 'utf-8');
     },
     transform,
-    buildStart() {
-      verbose && console.log(
-        `[${pluginName}]: Generated virtual files `,
-        input,
-      );
-    },
     configureServer({ middlewares, pluginContainer, transformIndexHtml }) {
-      const { base = '/' } = userConfig;
+      let { base = '/' } = userConfig;
+      base = normalizePath(`/${base}/`);
 
       middlewares.use(
         // @ts-ignore
         history({
           htmlAcceptHeaders: ['text/html', 'application/xhtml+xml'],
-          rewrites: rewrites || [
+          rewrites: (rewrites || []).concat([
             {
-              from: new RegExp(
-                normalizePath(`/${base}/(${Object.keys(input).join('|')})`),
-              ),
-              to: ctx => {
-                const rewritten = normalizePath(`/${base}/${input[ctx.match[1]]}`);
-                verbose && console.log(
-                  `[${pluginName}]: Hit default history fallback rule, rewriting ${ctx.parsedUrl.pathname} to ${rewritten}`,
-                );
-                return rewritten;
-              },
+              from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).join('|')})`)),
+              to: ctx => normalizePath(`/${inputMap[ctx.match[1]]}`),
             },
-          ],
+          ]),
         }),
       );
 
       middlewares.use(async (req, res, next) => {
         const accept = req.headers.accept;
+        const url = req.url!;
+
         // 忽略非入口html请求
         if (
           res.writableEnded ||
@@ -173,12 +184,24 @@ export function createMpaPlugin<
           return next();
         }
 
-        const url = req.url!;
+        // 统一路径，允许直接通过url访问虚拟文件
+        const rewritten = url.startsWith(base) ? url : normalizePath(`/${base}/${url}`);
+        const fileName = rewritten.replace(base, ''); // 文件名不能以'/'开头，否则无法对应到inputMap，因为inputMap的键是相对路径
 
-        const fileName = url!.replace(normalizePath(`/${base}/`), '');
+        if (verbose && req.originalUrl !== url) {
+          console.log(
+            `[${pluginName}]: Rewriting ${color.blue(req.originalUrl)} to ${color.blue(rewritten)}`,
+          );
+        }
 
-        if (!pageMap[fileName]) {
-          res.write(`[${pluginName}]: Missing corresponding entry file '${normalizePath(`/${base}/${fileName}`)}'`);
+        if (!virtualPageMap[fileName]) {
+          if (fileName.startsWith('/')) {
+            console.log(
+              `[${pluginName}]: ${color.red(`filename shouldn't startsWith '/', but received '${fileName}', which may be a bug`)}.`,
+              `Please report it at ${issuePath}, thanks!`,
+            );
+          }
+          res.write(`[${pluginName}]: Missing corresponding entry file '${rewritten}', please check your rewrite rules!`);
           res.end();
           return;
         }
