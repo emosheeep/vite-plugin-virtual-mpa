@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-virtual-mpa",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Out-of-the-box MPA plugin for Vite, with html template engine and virtual files support.",
   "author": "秦旭洋",
   "main": "dist/index.js",
@@ -37,10 +37,12 @@
   ],
   "dependencies": {
     "@types/connect-history-api-fallback": "^1.3.5",
+    "cli-color": "^2.0.3",
     "connect-history-api-fallback": "^2.0.0",
     "ejs": "^3.1.8"
   },
   "devDependencies": {
+    "@types/cli-color": "^2.0.2",
     "@types/ejs": "^3.1.1",
     "@types/node": "^18.7.18",
     "@typescript-eslint/eslint-plugin": "^5.37.0",

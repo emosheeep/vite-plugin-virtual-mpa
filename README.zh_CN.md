@@ -1,6 +1,15 @@
 # vite-plugin-virtual-mpa
 
-> 开箱即用的 Vite MPA插件，支持HTML模板引擎和虚拟文件功能，能够使用一份模板生成多个文件。
+<div style="display: flex;">
+  <a href="https://npmjs.com/package/vite-plugin-virtual-mpa">
+    <img src="https://img.shields.io/npm/v/vite-plugin-virtual-mpa" alt="npm package">
+  </a>
+  <img src="https://img.shields.io/npm/dt/vite-plugin-virtual-mpa" alt="npm downloads">
+  <img src="https://img.shields.io/npm/l/vite-plugin-virtual-mpa" alt="npm downloads">
+  <img src="https://img.shields.io/bundlephobia/minzip/vite-plugin-virtual-mpa" alt="package size">
+</div>
+
+开箱即用的 Vite MPA插件，支持HTML模板引擎和虚拟文件功能，能够使用一份模板生成多个文件。
 
 [English](./README.md) | 中文
 
@@ -79,7 +88,8 @@ interface MpaOptions {
   rewrites?: Rewrite[],
   pages: Array<{
     /**
-     * 页面标识，必填
+     * 必填。该名称是一个不包含'/'的普通字符串，它用于生成默认的重定向规则。
+     * 如果你想自定义生成文件的路径，请使用filename选项，而不是name选项。
      */
     name: string;
     /**
@@ -104,50 +114,91 @@ interface MpaOptions {
 ```
 ## Examples
 
+点击链接 [codesandbox](https://codesandbox.io/s/vite-plugin-virtual-mpa-0djylc) 快速体验
+
 ```ts
 // vite.config.ts
-import { createMpaPlugin } from 'vite-plugin-virtual-mpa'
+import { normalizePath } from "vite";
+import { createMpaPlugin } from "vite-plugin-virtual-mpa"
+
+const base = "/sites/"
 
 // @see https://vitejs.dev/config/
 export default defineConfig({
-  base: '/fruits/',
-  build: {
-    outDir: 'sites'
-  },
+  base,
   plugins: [
     createMpaPlugin({
-      // 开发阶段(vite serve)自定义 history fallback rewrite rules
-      rewrites: [
-        {
-          from: /\/fruits\/(apple|banana|strawberries)/, 
-          to: ctx => `/fruits/${ctx.match[1]}.html`
-        },
-      ],
       pages: [
         {
-          name: 'apple',
-          // 可选的文件名配置，默认是 name + '.html',
-          filename: 'fruits/apple.html', // 最终会以相对路径生成在output目录（sites）—— sites/fruits/apple.html
+          name: "apple",
+          /**
+           * 文件名是可选的，默认将会是`${name}.html`，这个路径是相对于`build.outDir`
+           */
+          filename: "fruits/apple.html", // 将会在编译时输出到sites/fruits/apple.html
+          entry: "/src/fruits/apple/apple.js",
           data: {
-            title: 'This is Apple page',
-          },
+            title: "This is Apple page"
+          }
         },
         {
-          name: 'banana',
-          filename: 'fruits/banana.html',
+          name: "banana",
+          filename: "fruits/banana.html",
+          entry: "/src/fruits/banana/banana.js",
           data: {
-            title: 'This is Banana page',
-          },
+            title: "This is Banana page"
+          }
         },
         {
-          name: 'strawberries',
-          filename: 'fruits/strawberries.html',
+          name: "strawberries",
+          filename: "fruits/strawberries.html",
+          entry: "/src/fruits/strawberries/strawberries.js",
           data: {
-            title: 'This is Strawberries page',
-          },
-        },
+            title: "This is Strawberries page"
+          }
+        }
+      ],
+      /**
+       * 通过该选项rewrites来配置history fallback rewrite rules
+       * 如果你像上面这样配置页面的话，那下面的这份配置将会自动生成。
+       * 否则你需要自己编写重定向规则，自定义规则将覆盖默认规则。
+       */
+      rewrites: [
+        {
+          from: new RegExp(normalizePath(`/${base}/(apple|banana|strawberries)`)),
+          to: (ctx) => normalizePath(`/fruits/${ctx.match[1]}.html`),
+        }
       ],
     }),
   ],
 })
 ```
+
+## 默认重定向规则
+
+正如上面提到的👆🏻，如果你的配置遵循约定，插件将会自动生成一份重定向规则，如下：
+```ts
+{
+  from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).join('|')})`)),
+  to: ctx => normalizePath(`/${inputMap[ctx.match[1]]}`),
+}
+```
+
+其中, **inputMap** 是一个`name`到对应虚拟文件的映射，结构如下:
+
+```ts
+{
+  apple: 'fruits/apple.html',
+  banana: 'fruits/banana.html',
+  strawberries: 'fruits/strawberries.html',
+}
+```
+
+请求Url`/sites/apple/xxx`将会被**默认重定向规则**处理并重定向到对应的url，也就是`/fruits/apple.html`(name `'apple'` 对应 `'fruits/apple.html'`, 其他同理)，重定向后的路径将会基于`viteConfig.base(这里是'/sites/')`去寻找目标文件，所以最终的Url会变成`/sites/fruits/apple.html`.
+
+## 关于虚拟入口文件
+
+通常在开发时，我们的文件都是写在本地的，我们通过DevServer的代理能够通过url访问到本地对应的文件。虚拟文件也是如此，只不过对应的文件没有写到文件系统中，而是保存在内存中而已。
+
+该插件通过模板系统生成了对应的虚拟文件，让你可以在开发时**通过代理访问到内存中的虚拟文件**，并在构建时生成到对应的目录下。
+
+你完全可以认为这些虚拟文件是真实存在的，这将有助于你在脑海中构建关于虚拟文件的直觉，以便能够正确地编写代理配置。

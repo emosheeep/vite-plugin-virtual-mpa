@@ -1,6 +1,15 @@
 # vite-plugin-virtual-mpa
 
-> Out-of-the-box MPA plugin for Vite, with html template engine and virtual files support, generate multiple files using only one template
+<div style="display: flex;">
+  <a href="https://npmjs.com/package/vite-plugin-virtual-mpa">
+    <img src="https://img.shields.io/npm/v/vite-plugin-virtual-mpa" alt="npm package">
+  </a>
+  <img src="https://img.shields.io/npm/dt/vite-plugin-virtual-mpa" alt="npm downloads">
+  <img src="https://img.shields.io/npm/l/vite-plugin-virtual-mpa" alt="npm downloads">
+  <img src="https://img.shields.io/bundlephobia/minzip/vite-plugin-virtual-mpa" alt="package size">
+</div>
+
+Out-of-the-box MPA plugin for Vite, with html template engine and virtual files support, generate multiple files using only one template
 
 English | [中文](./README.zh_CN.md)
 
@@ -82,7 +91,8 @@ interface MpaOptions {
    */
   pages: Array<{
     /**
-     * Required page name.
+     * Required. Name is used to generate default rewrite rules, it just a common string and please don't include '/'.
+     * You can use filename option not name option if you want to customize the path of generated files.
      */
     name: string;
     /**
@@ -107,50 +117,92 @@ interface MpaOptions {
 ```
 ## Examples
 
+Click here [codesandbox](https://codesandbox.io/s/vite-plugin-virtual-mpa-0djylc) for a quick preview!
+
 ```ts
 // vite.config.ts
-import { createMpaPlugin } from 'vite-plugin-virtual-mpa'
+import { normalizePath } from "vite";
+import { createMpaPlugin } from "vite-plugin-virtual-mpa"
+
+const base = "/sites/"
 
 // @see https://vitejs.dev/config/
 export default defineConfig({
-  base: '/fruits/',
-  build: {
-    outDir: 'sites'
-  },
+  base,
   plugins: [
     createMpaPlugin({
-      // Customize the history fallback rewrite rules
-      rewrites: [
-        {
-          from: /\/fruits\/(apple|banana|strawberries)/, 
-          to: ctx => `/fruits/${ctx.match[1]}.html`
-        },
-      ],
       pages: [
         {
-          name: 'apple',
-          // filename is optional, default is apple.html, which is relative path of `build.outDir`.
-          filename: 'fruits/apple.html', // output into sites/fruits/apple.html at build time.
+          name: "apple",
+          /**
+           * filename is optional, default is `${name}.html`, which is the relative path of `build.outDir`.
+           */
+          filename: "fruits/apple.html", // output into sites/fruits/apple.html at build time.
+          entry: "/src/fruits/apple/apple.js",
           data: {
-            title: 'This is Apple page',
-          },
+            title: "This is Apple page"
+          }
         },
         {
-          name: 'banana',
-          filename: 'fruits/banana.html',
+          name: "banana",
+          filename: "fruits/banana.html",
+          entry: "/src/fruits/banana/banana.js",
           data: {
-            title: 'This is Banana page',
-          },
+            title: "This is Banana page"
+          }
         },
         {
-          name: 'strawberries',
-          filename: 'fruits/strawberries.html',
+          name: "strawberries",
+          filename: "fruits/strawberries.html",
+          entry: "/src/fruits/strawberries/strawberries.js",
           data: {
-            title: 'This is Strawberries page',
-          },
-        },
+            title: "This is Strawberries page"
+          }
+        }
+      ],
+      /**
+       * Customize the history fallback rewrite rules.
+       * If you config your pages as above, this rewrite rules will be automatically generated.
+       * Otherwise you should manually write it, which will overwrite the default.
+       */
+      rewrites: [
+        {
+          from: new RegExp(normalizePath(`/${base}/(apple|banana|strawberries)`)),
+          to: (ctx) => normalizePath(`/fruits/${ctx.match[1]}.html`),
+        }
       ],
     }),
   ],
 })
 ```
+
+## Default Rewrite Rules
+
+As the examples above says 👆🏻, if you follow the conventions of configurations, this plugin will generate a default rule which looks like:
+
+```ts
+{
+  from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).join('|')})`)),
+  to: ctx => normalizePath(`/${inputMap[ctx.match[1]]}`),
+}
+```
+
+Here, **inputMap** is a dictionary that map the name matched into the corresponding virtual entry file. The structure of the `inputMap` is as follows:
+
+```ts
+{
+  apple: 'fruits/apple.html',
+  banana: 'fruits/banana.html',
+  strawberries: 'fruits/strawberries.html',
+}
+```
+
+Request url `/sites/apple/xxx` will be processed by **Default Rewrite Rule**, and will be redirected to the corresponding fallback url `/fruits/apple.html`(name `'apple'` correspond to `'fruits/apple.html'`, the same goes for the rest ones), which is based on `viteConfig.base(here is '/sites/')`. So the final url will be `/sites/fruits/apple.html`.
+
+##  About virtual entry files
+
+Usually during development, our files are written locally, and we can access the local corresponding files through the URL through the DevServer proxy. The same is true for virtual files, except that the corresponding file is not written to the filesystem but is kept in memory.
+
+The plugin generates virtual files using the template system, allowing you to **reach the in-memory virtual files** at development time and generate them in the corresponding directory at build time. 
+ 
+It's perfectly okay to think that these virtual files are really exist, and it will help you build an intuition about them in your mind to be able to write your proxy configuration correctly.
