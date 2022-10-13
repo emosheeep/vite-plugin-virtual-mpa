@@ -64,7 +64,7 @@ export function createMpaPlugin<
   T3 extends string,
 >(
   config: MpaOptions<T, T1, T2, T3>,
-): Plugin {
+): [(pages)=>void, Plugin] {
   const {
     template = 'index.html',
     verbose = true,
@@ -75,20 +75,25 @@ export function createMpaPlugin<
   const inputMap: Record<string, string> = {};
   const virtualPageMap: Record<string, Page<T1, T2, T3>> = {};
 
-  for (const page of pages) {
-    const entryPath = page.filename || `${page.name}.html`;
-    if (entryPath.startsWith('/')) {
-      throw new Error(`[${pluginName}]: Make sure the path relative, received '${entryPath}'`);
+  function processPages(pages){
+    console.log("reload called!")
+    for (const page of pages) {
+      const entryPath = page.filename || `${page.name}.html`;
+      if (entryPath.startsWith('/')) {
+        throw new Error(`[${pluginName}]: Make sure the path relative, received '${entryPath}'`);
+      }
+      if (page.name.includes('/')) {
+        throw new Error(`[${pluginName}]: Page name shouldn't include '/', received '${page.name}'`);
+      }
+      if (page.entry && !page.entry.startsWith('/')) {
+        throw new Error(`[${pluginName}]: Entry must be an absolute path relative to the project root, received '${page.name}'`);
+      }
+      virtualPageMap[entryPath] = page;
+      inputMap[page.name] = entryPath;
     }
-    if (page.name.includes('/')) {
-      throw new Error(`[${pluginName}]: Page name shouldn't include '/', received '${page.name}'`);
-    }
-    if (page.entry && !page.entry.startsWith('/')) {
-      throw new Error(`[${pluginName}]: Entry must be an absolute path relative to the project root, received '${page.name}'`);
-    }
-    virtualPageMap[entryPath] = page;
-    inputMap[page.name] = entryPath;
   }
+
+  processPages(pages)
 
   /**
    * 模板文件处理
@@ -111,114 +116,117 @@ export function createMpaPlugin<
   }
 
   let userConfig: ResolvedConfig;
-  return {
-    name: pluginName,
-    config() {
-      return {
-        appType: 'mpa',
-        clearScreen: false,
-        optimizeDeps: {
-          entries: pages
+  return [
+    processPages,
+    {
+      name: pluginName,
+      config() {
+        return {
+          appType: 'mpa',
+          clearScreen: false,
+          optimizeDeps: {
+            entries: pages
             .map(v => v.entry)
             .filter(v => !!v) as string[],
-        },
-        build: {
-          rollupOptions: {
-            input: inputMap,
           },
-        },
-      };
-    },
-    configResolved(config) {
-      userConfig = config;
-      if (verbose) {
-        const colorProcess = path => normalizePath(`<${color.blue(config.build.outDir)}>/${color.green(path)}`);
-        const inputFiles = Object.values(inputMap).map(colorProcess);
-        console.log(`[${pluginName}]: Generated virtual files: \n${inputFiles.join('\n')}`);
-      }
-    },
-    /**
-     * 拦截html请求
-     */
-    resolveId(id, importer, options) {
-      if (options.isEntry && virtualPageMap[id]) {
-        return id;
-      }
-    },
-    /**
-     * 根据配置映射html文件
-     */
-    load(id) {
-      const page = virtualPageMap[id];
-      if (!page) return null;
-      return readFileSync(page.template || template, 'utf-8');
-    },
-    transform,
-    configureServer({ middlewares, pluginContainer, transformIndexHtml }) {
-      let { base = '/' } = userConfig;
-      base = normalizePath(`/${base}/`);
-
-      middlewares.use(
-        // @ts-ignore
-        history({
-          htmlAcceptHeaders: ['text/html', 'application/xhtml+xml'],
-          rewrites: (rewrites || []).concat([
-            {
-              from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).join('|')})`)),
-              to: ctx => normalizePath(`/${inputMap[ctx.match[1]]}`),
+            build: {
+              rollupOptions: {
+                input: inputMap,
+              },
             },
-          ]),
-        }),
-      );
+        };
+      },
+      configResolved(config) {
+        userConfig = config;
+        if (verbose) {
+          const colorProcess = path => normalizePath(`<${color.blue(config.build.outDir)}>/${color.green(path)}`);
+          const inputFiles = Object.values(inputMap).map(colorProcess);
+          console.log(`[${pluginName}]: Generated virtual files: \n${inputFiles.join('\n')}`);
+        }
+      },
+      /**
+        * 拦截html请求
+      */
+      resolveId(id, importer, options) {
+        if (options.isEntry && virtualPageMap[id]) {
+          return id;
+        }
+      },
+      /**
+        * 根据配置映射html文件
+      */
+      load(id) {
+        const page = virtualPageMap[id];
+        if (!page) return null;
+        return readFileSync(page.template || template, 'utf-8');
+      },
+      transform,
+      configureServer({ middlewares, pluginContainer, transformIndexHtml }) {
+        let { base = '/' } = userConfig;
+        base = normalizePath(`/${base}/`);
 
-      middlewares.use(async (req, res, next) => {
-        const accept = req.headers.accept;
-        const url = req.url!;
+        middlewares.use(
+          // @ts-ignore
+          history({
+            htmlAcceptHeaders: ['text/html', 'application/xhtml+xml'],
+            rewrites: (rewrites || []).concat([
+              {
+                from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).join('|')})`)),
+                to: ctx => normalizePath(`/${inputMap[ctx.match[1]]}`),
+              },
+            ]),
+          }),
+        );
 
-        // 忽略非入口html请求
-        if (
-          res.writableEnded ||
-          accept === '*/*' ||
+        middlewares.use(async (req, res, next) => {
+          const accept = req.headers.accept;
+          const url = req.url!;
+
+          // 忽略非入口html请求
+          if (
+            res.writableEnded ||
+            accept === '*/*' ||
           !accept?.includes('text/html')
-        ) {
-          return next();
-        }
+          ) {
+            return next();
+          }
 
-        // 统一路径，允许直接通过url访问虚拟文件
-        const rewritten = url.startsWith(base) ? url : normalizePath(`/${base}/${url}`);
-        const fileName = rewritten.replace(base, ''); // 文件名不能以'/'开头，否则无法对应到inputMap，因为inputMap的键是相对路径
+          // 统一路径，允许直接通过url访问虚拟文件
+          const rewritten = url.startsWith(base) ? url : normalizePath(`/${base}/${url}`);
+          const fileName = rewritten.replace(base, ''); // 文件名不能以'/'开头，否则无法对应到inputMap，因为inputMap的键是相对路径
 
-        if (verbose && req.originalUrl !== url) {
-          console.log(
-            `[${pluginName}]: Rewriting ${color.blue(req.originalUrl)} to ${color.blue(rewritten)}`,
-          );
-        }
-
-        if (!virtualPageMap[fileName]) {
-          if (fileName.startsWith('/')) {
+          if (verbose && req.originalUrl !== url) {
             console.log(
-              `[${pluginName}]: ${color.red(`filename shouldn't startsWith '/', but received '${fileName}', which may be a bug`)}.`,
-              `Please report it at ${issuePath}, thanks!`,
+              `[${pluginName}]: Rewriting ${color.blue(req.originalUrl)} to ${color.blue(rewritten)}`,
             );
           }
-          res.write(`[${pluginName}]: Missing corresponding entry file '${rewritten}', please check your rewrite rules!`);
-          res.end();
-          return;
-        }
 
-        res.end(
-          await transformIndexHtml(
-            url,
-            transform(
-              await pluginContainer.load(fileName) as string,
-              fileName,
+          if (!virtualPageMap[fileName]) {
+            if (fileName.startsWith('/')) {
+              console.log(
+                `[${pluginName}]: ${color.red(`filename shouldn't startsWith '/', but received '${fileName}', which may be a bug`)}.`,
+                `Please report it at ${issuePath}, thanks!`,
+              );
+            }
+            res.write(`[${pluginName}]: Missing corresponding entry file '${rewritten}', please check your rewrite rules!`);
+            res.end();
+            return;
+          }
+
+          res.end(
+            await transformIndexHtml(
+              url,
+              transform(
+                await pluginContainer.load(fileName) as string,
+                fileName,
+              ),
+              req.originalUrl,
             ),
-            req.originalUrl,
-          ),
-        );
-      });
-    },
-  };
+          );
+        });
+      },
+    }
+  ]
 }
 
 // // This is for type declaration testing.
