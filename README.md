@@ -87,6 +87,19 @@ interface MpaOptions {
    */
   rewrites?: Rewrite[],
   /**
+   * Sometimes you might want to update the `pages` configuration or take some other measures when
+   * there are some files added, removed, changed and so on.
+   * You can set `watchOptions` and customize your logic.
+   *
+   * The `include` and `exclude` based on `Rollup.createFilter`, see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
+   */
+  watchOptions?: WatchHandler | {
+    include?: string | RegExp | string[] | RegExp[],
+    excluded?: string | RegExp | string[] | RegExp[],
+    events?: ('add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir')[],
+    handler: WatchHandler
+  },
+  /**
    * your MPA core configurations
    */
   pages: Array<{
