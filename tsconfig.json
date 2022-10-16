@@ -2,7 +2,7 @@
   "compilerOptions": {
     "declaration": true,
     "declarationMap": false,
-    "emitDeclarationOnly": true,
+    "declarationDir": "types",
     "skipLibCheck": true,
     "removeComments": true,
     "allowJs": true,
@@ -29,7 +29,7 @@
     }
   },
   "include": [
-    "index.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
     "node_modules",

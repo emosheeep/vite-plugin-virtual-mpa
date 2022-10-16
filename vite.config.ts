@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { externals } from 'rollup-plugin-node-externals';
+import viteChecker from 'vite-plugin-checker';
 
 export default defineConfig({
   plugins: [
@@ -11,12 +12,18 @@ export default defineConfig({
         peerDeps: true,
       }),
     },
+    viteChecker({
+      typescript: true,
+      eslint: {
+        lintCommand: 'eslint . --ext .js,.ts',
+      },
+    }),
   ],
   build: {
     minify: false,
     lib: {
       fileName: 'index',
-      entry: 'index.ts',
+      entry: 'src/index.ts',
       formats: ['es', 'cjs'],
     },
   },
