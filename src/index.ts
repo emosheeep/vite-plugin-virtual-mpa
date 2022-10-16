@@ -1,93 +1,63 @@
-import { name as pluginName } from './package.json';
-import { Plugin, ResolvedConfig, normalizePath } from 'vite';
-import { readFileSync } from 'fs';
-import history, { Rewrite } from 'connect-history-api-fallback';
-import color from 'cli-color';
 import ejs from 'ejs';
+import path from 'path';
+import color from 'cli-color';
+import { readFileSync } from 'fs';
+import history from 'connect-history-api-fallback';
+import { name as pkgName } from '../package.json';
+import { Plugin, normalizePath, createFilter } from 'vite';
+import { MpaOptions, AllowedEvent, Page, WatchOptions, AllowedEvents } from './utils';
 
 const bodyInject = /<\/body>/;
+const pluginName = color.cyan(pkgName);
 const issuePath = color.blue('https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/new');
 
-type TplStr<T extends string> = T extends `/${infer P}` ? TplStr<P> : T extends `${infer Q}.html` ? TplStr<Q> : `${T}.html`
-
-interface Page<Name extends string, Filename extends string, Tpl extends string> {
-  /**
-   * Required. Name is used to generate default rewrite rules, it just a common string and please don't include '/'.
-   * You can use filename option not name option if you want to customize the path of generated files.
-   */
-  name: Name extends `${string}/${string}` ? never : Name;
-  /**
-   * Relative path to the output directory, which should end with .html
-   * @default `${name}.html`
-   */
-  filename?: TplStr<Filename>;
-  /**
-   * Higher priority template file, which will overwrite the default template.
-   */
-  template?: TplStr<Tpl>;
-  /**
-   * Entry file that will append to body. which you should remove from the html template file.
-   */
-  entry?: `/${string}`;
-  /**
-   * Data to inject with ejs.
-   */
-  data?: Record<string, any>,
-}
-
-export interface MpaOptions<T extends string, T1 extends string, T2 extends string, T3 extends string> {
-  /**
-   * whether to print log
-   * @default true
-   */
-  verbose?: boolean,
-  /**
-   * default template file
-   * @default index.html
-   */
-  template?: TplStr<T>,
-  /**
-   * Configure your rewrite rules, only proceed fallback html requests.
-   * further: https://github.com/bripkens/connect-history-api-fallback
-   */
-  rewrites?: Rewrite[],
-  /**
-   * your MPA core configurations
-   */
-  pages: Array<Page<T1, T2, T3>>
-}
-
 export function createMpaPlugin<
-  T extends string,
-  T1 extends string,
-  T2 extends string,
-  T3 extends string,
+  PN extends string,
+  PFN extends string,
+  PT extends string,
+  PN1 extends string,
+  PFN1 extends string,
+  PT1 extends string,
+  Event extends AllowedEvent,
+  TPL extends string,
 >(
-  config: MpaOptions<T, T1, T2, T3>,
+  config: MpaOptions<PN, PFN, PT, PN1, PFN1, PT1, Event, TPL>,
 ): Plugin {
   const {
     template = 'index.html',
     verbose = true,
     pages,
     rewrites,
+    watchOptions,
   } = config;
 
-  const inputMap: Record<string, string> = {};
-  const virtualPageMap: Record<string, Page<T1, T2, T3>> = {};
+  let inputMap: Record<string, string> = {};
+  let virtualPageMap: Record<string, Page<string, string, string>> = {};
 
-  for (const page of pages) {
-    const entryPath = page.filename || `${page.name}.html`;
-    if (entryPath.startsWith('/')) {
-      throw new Error(`[${pluginName}]: Make sure the path relative, received '${entryPath}'`);
+  /**
+   * 更新页面配置
+   */
+  function configInit(pages: Page<string, string, string>[]) {
+    const [tempInputMap, tempVirtualPageMap]: [typeof inputMap, typeof virtualPageMap] = [{}, {}];
+    for (const page of pages) {
+      const entryPath = page.filename || `${page.name}.html`;
+      if (entryPath.startsWith('/')) {
+        throw new Error(`[${pluginName}]: Make sure the path relative, received '${entryPath}'`);
+      }
+      if (page.name.includes('/')) {
+        throw new Error(`[${pluginName}]: Page name shouldn't include '/', received '${page.name}'`);
+      }
+      if (page.entry && !page.entry.startsWith('/')) {
+        throw new Error(`[${pluginName}]: Entry must be an absolute path relative to the project root, received '${page.name}'`);
+      }
+      tempInputMap[page.name] = entryPath;
+      tempVirtualPageMap[entryPath] = page;
     }
-    if (page.name.includes('/')) {
-      throw new Error(`[${pluginName}]: Page name shouldn't include '/', received '${page.name}'`);
-    }
-    if (page.entry && !page.entry.startsWith('/')) {
-      throw new Error(`[${pluginName}]: Entry must be an absolute path relative to the project root, received '${page.name}'`);
-    }
-    virtualPageMap[entryPath] = page;
-    inputMap[page.name] = entryPath;
+    /**
+     * 使用新配置直接替换旧的配置
+     */
+    inputMap = tempInputMap;
+    virtualPageMap = tempVirtualPageMap;
   }
 
   /**
@@ -110,10 +80,11 @@ export function createMpaPlugin<
     );
   }
 
-  let userConfig: ResolvedConfig;
   return {
     name: pluginName,
     config() {
+      configInit(config.pages); // 初始化
+
       return {
         appType: 'mpa',
         clearScreen: false,
@@ -130,7 +101,6 @@ export function createMpaPlugin<
       };
     },
     configResolved(config) {
-      userConfig = config;
       if (verbose) {
         const colorProcess = path => normalizePath(`<${color.blue(config.build.outDir)}>/${color.green(path)}`);
         const inputFiles = Object.values(inputMap).map(colorProcess);
@@ -154,9 +124,53 @@ export function createMpaPlugin<
       return readFileSync(page.template || template, 'utf-8');
     },
     transform,
-    configureServer({ middlewares, pluginContainer, transformIndexHtml }) {
-      let { base = '/' } = userConfig;
-      base = normalizePath(`/${base}/`);
+    configureServer(server) {
+      const {
+        config,
+        watcher,
+        middlewares,
+        pluginContainer,
+        transformIndexHtml,
+      } = server;
+
+      const base = normalizePath(`/${config.base || '/'}/`);
+
+      if (watchOptions) {
+        const {
+          events,
+          handler,
+          include,
+          excluded,
+        } = (typeof watchOptions === 'function'
+          ? { handler: watchOptions }
+          : watchOptions) as WatchOptions<PN1, PFN1, PT1, Event>;
+
+        const isMatch = createFilter(include || /.*/, excluded);
+
+        watcher.on('all', (type: Event, filename) => {
+          if (!AllowedEvents.includes(type)) {
+            return console.log(
+              `[${pluginName}]: Unknown event '${type}'.`,
+            );
+          }
+
+          if (!isMatch(filename)) return;
+          if (events && !events.includes(type)) return;
+
+          const file = path.relative(config.root, filename);
+
+          verbose && console.log(
+            `[${pluginName}]: ${color.blue(type)} - ${color.blue(file)}`,
+          );
+
+          handler({
+            type,
+            file,
+            server,
+            reloadPages: configInit,
+          });
+        });
+      }
 
       middlewares.use(
         // @ts-ignore
@@ -224,6 +238,20 @@ export function createMpaPlugin<
 // // This is for type declaration testing.
 // /* @__PURE__ */createMpaPlugin({
 //   template: 'na.html',
+//   watchOptions: {
+//     include: [],
+//     events: ['unlink', 'change'],
+//     handler(ctx) {
+//       ctx.type;
+//       ctx.reloadPages([
+//         {
+//           name: '123',
+//           filename: '////av.abv.v.html.html',
+//           template: 'a.b.v',
+//         },
+//       ]);
+//     },
+//   },
 //   pages: [
 //     {
 //       name: '123',

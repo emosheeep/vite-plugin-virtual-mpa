@@ -86,6 +86,18 @@ interface MpaOptions {
    * 详见: https://github.com/bripkens/connect-history-api-fallback
    */
   rewrites?: Rewrite[],
+  /**
+   * 有时候你可能想在项目中发生文件更新、删除、添加等操作时采取一些措施，例如更新插件内部的 pages 配置。
+   * 你可以通过设置`watchOptions`来自定义处理逻辑。
+   *
+   * 配置项中 `include` 和 `exclude` 基于 `Rollup.createFilter`, 详见 https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
+   */
+  watchOptions?: WatchHandler | {
+    include?: string | RegExp | string[] | RegExp[],
+    excluded?: string | RegExp | string[] | RegExp[],
+    events?: ('add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir')[],
+    handler: WatchHandler
+  },
   pages: Array<{
     /**
      * 必填。该名称是一个不包含'/'的普通字符串，它用于生成默认的重定向规则。
