@@ -1,4 +1,9 @@
+# 1.2.0
+
+- Improve typings.
+
 # 1.2.0-beta.0
+
 - Add `watchOptions` to allow users writing custom logic when file events fired. [#2](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/2)
 
 # 1.1.0

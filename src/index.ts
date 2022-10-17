@@ -5,7 +5,7 @@ import { readFileSync } from 'fs';
 import history from 'connect-history-api-fallback';
 import { name as pkgName } from '../package.json';
 import { Plugin, normalizePath, createFilter } from 'vite';
-import { MpaOptions, AllowedEvent, Page, WatchOptions, AllowedEvents } from './utils';
+import { MpaOptions, AllowedEvent, Page, WatchOptions } from './utils';
 
 const bodyInject = /<\/body>/;
 const pluginName = color.cyan(pkgName);
@@ -15,13 +15,10 @@ export function createMpaPlugin<
   PN extends string,
   PFN extends string,
   PT extends string,
-  PN1 extends string,
-  PFN1 extends string,
-  PT1 extends string,
   Event extends AllowedEvent,
   TPL extends string,
 >(
-  config: MpaOptions<PN, PFN, PT, PN1, PFN1, PT1, Event, TPL>,
+  config: MpaOptions<PN, PFN, PT, Event, TPL>,
 ): Plugin {
   const {
     template = 'index.html',
@@ -31,13 +28,14 @@ export function createMpaPlugin<
     watchOptions,
   } = config;
 
+  type CommonPage = Page<string, string, string>;
   let inputMap: Record<string, string> = {};
-  let virtualPageMap: Record<string, Page<string, string, string>> = {};
+  let virtualPageMap: Record<string, CommonPage> = {};
 
   /**
    * 更新页面配置
    */
-  function configInit(pages: Page<string, string, string>[]) {
+  function configInit(pages: CommonPage[]) {
     const [tempInputMap, tempVirtualPageMap]: [typeof inputMap, typeof virtualPageMap] = [{}, {}];
     for (const page of pages) {
       const entryPath = page.filename || `${page.name}.html`;
@@ -141,21 +139,15 @@ export function createMpaPlugin<
           handler,
           include,
           excluded,
-        } = (typeof watchOptions === 'function'
-          ? { handler: watchOptions }
-          : watchOptions) as WatchOptions<PN1, PFN1, PT1, Event>;
+        } = typeof watchOptions === 'function'
+          ? { handler: watchOptions } as WatchOptions<Event>
+          : watchOptions;
 
         const isMatch = createFilter(include || /.*/, excluded);
 
         watcher.on('all', (type: Event, filename) => {
-          if (!AllowedEvents.includes(type)) {
-            return console.log(
-              `[${pluginName}]: Unknown event '${type}'.`,
-            );
-          }
-
-          if (!isMatch(filename)) return;
           if (events && !events.includes(type)) return;
+          if (!isMatch(filename)) return;
 
           const file = path.relative(config.root, filename);
 

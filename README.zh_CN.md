@@ -70,6 +70,16 @@ export default defineConfig({
 ## Options
 
 ```ts
+type FilterPattern = string | RegExp | (string | RegExp)[]
+interface WatchHandler {
+  (ctx: {
+    server: ViteDevServer,
+    file: string,
+    type: Event
+    reloadPages: (pages: []) => void
+  }): void
+}
+
 interface MpaOptions {
   /**
    * 是否在控制台打印log
@@ -87,14 +97,14 @@ interface MpaOptions {
    */
   rewrites?: Rewrite[],
   /**
-   * 有时候你可能想在项目中发生文件更新、删除、添加等操作时采取一些措施，例如更新插件内部的 pages 配置。
-   * 你可以通过设置`watchOptions`来自定义处理逻辑。
+   * 当项目目录下有一些文件触发相应的事件如添加、删除、修改时，你可能想要重新加载 `pages` 配置 或 重启 ViteDevServer。
+   * 你可以通过设置 `watchOptions` 来实现这一目的。
    *
    * 配置项中 `include` 和 `exclude` 基于 `Rollup.createFilter`, 详见 https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
    */
   watchOptions?: WatchHandler | {
-    include?: string | RegExp | string[] | RegExp[],
-    excluded?: string | RegExp | string[] | RegExp[],
+    include?: FilterPattern,
+    excluded?: FilterPattern,
     events?: ('add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir')[],
     handler: WatchHandler
   },
