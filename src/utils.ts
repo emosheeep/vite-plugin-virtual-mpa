@@ -40,39 +40,30 @@ export interface Page<
   data?: Record<string, any>
 }
 
-type WatchHandler<
-  PN extends string,
-  PFN extends string,
-  PT extends string,
-  Event extends AllowedEvent,
-> = (
+type WatchHandler<Event extends AllowedEvent> = (
   ctx: {
     server: ViteDevServer,
     file: string,
     type: Event
-    reloadPages: (pages: Page<PN, PFN, PT>[]) => void
+    reloadPages: <
+      PN extends string,
+      PFN extends string,
+      PT extends string,
+    >(pages: Page<PN, PFN, PT>[]) => void
   }
 ) => void;
 
-export interface WatchOptions<
-  PN extends string,
-  PFN extends string,
-  PT extends string,
-  Event extends AllowedEvent,
->{
+export interface WatchOptions<Event extends AllowedEvent>{
   include?: Exclude<FilterPattern, null>,
   excluded?: Exclude<FilterPattern, null>,
   events?: Event[],
-  handler: WatchHandler<PN, PFN, PT, Event>
+  handler: WatchHandler<Event>
 }
 
 export interface MpaOptions<
   PN extends string,
   PFN extends string,
   PT extends string,
-  PN1 extends string,
-  PFN1 extends string,
-  PT1 extends string,
   Event extends AllowedEvent,
   TPL extends string,
 > {
@@ -92,13 +83,13 @@ export interface MpaOptions<
    */
   rewrites?: Rewrite[]
   /**
-   * Sometimes you might want to update the `pages` configuration or take some other measures when
-   * there are some files added, removed, changed and so on.
-   * You can set `watchOptions` and customize `handler` to handling this.
+   * Sometimes you might want to reload `pages` config or restart ViteDevServer when
+   * there are some files added, removed, changed and so on. You can set `watchOptions` to
+   * customize your own logic.
    *
    * The `include` and `exclude` based on `Rollup.createFilter`, see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
    */
-  watchOptions?: WatchHandler<PN1, PFN1, PT1, Event> | WatchOptions<PN1, PFN1, PT1, Event>,
+  watchOptions?: WatchHandler<Event> | WatchOptions<Event>,
   /**
    * Your MPA core configurations
    */

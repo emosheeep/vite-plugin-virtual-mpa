@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-virtual-mpa",
-  "version": "1.2.0-beta.0",
+  "version": "1.2.0",
   "description": "Out-of-the-box MPA plugin for Vite, with html template engine and virtual files support.",
   "author": "秦旭洋",
   "main": "dist/index.js",

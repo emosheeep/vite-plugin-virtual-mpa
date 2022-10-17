@@ -70,6 +70,16 @@ export default defineConfig({
 ## Options
 
 ```ts
+type FilterPattern = string | RegExp | (string | RegExp)[]
+interface WatchHandler {
+  (ctx: {
+    server: ViteDevServer,
+    file: string,
+    type: Event
+    reloadPages: (pages: []) => void
+  }): void
+}
+
 interface MpaOptions {
   /**
    * whether to print log
@@ -87,15 +97,15 @@ interface MpaOptions {
    */
   rewrites?: Rewrite[],
   /**
-   * Sometimes you might want to update the `pages` configuration or take some other measures when
-   * there are some files added, removed, changed and so on.
-   * You can set `watchOptions` and customize your logic.
+   * Sometimes you might want to reload `pages` config or restart ViteDevServer when
+   * there are some files added, removed, changed and so on. You can set `watchOptions` to
+   * customize your own logic.
    *
    * The `include` and `exclude` based on `Rollup.createFilter`, see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
    */
   watchOptions?: WatchHandler | {
-    include?: string | RegExp | string[] | RegExp[],
-    excluded?: string | RegExp | string[] | RegExp[],
+    include?: FilterPattern,
+    excluded?: FilterPattern,
     events?: ('add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir')[],
     handler: WatchHandler
   },
