@@ -1,3 +1,7 @@
+# 1.2.1
+
+- Improve typings and add comments for a better prompts
+
 # 1.2.0
 
 - Improve typings.
