@@ -1,4 +1,4 @@
-# vite-plugin-virtual-mpa
+# vite-plugin-virtual-mpa ⚡
 
 <div style="display: flex;">
   <a href="https://npmjs.com/package/vite-plugin-virtual-mpa">
@@ -9,15 +9,16 @@
   <img src="https://img.shields.io/bundlephobia/minzip/vite-plugin-virtual-mpa" alt="package size">
 </div>
 
-开箱即用的 Vite MPA插件，支持HTML模板引擎和虚拟文件功能，能够使用一份模板生成多个文件。
+开箱即用的 Vite MPA插件 📦，支持HTML模板引擎和虚拟文件功能，能够使用一份模板生成多个文件。
 
 [English](./README.md) | 中文
 
 ## 主要功能
 
-- EJS 模板渲染
-- 多页面应用支持，开发时提供history fallback能力.
-- 自定义模板HTML文件的输出路径, 使用一份模板生成多份文件
+- 💡 EJS 模板渲染
+- 💡 完备的 TypeScript 类型支持，是一款小而美的插件
+- 🛠️ 自定义模板HTML文件的输出路径, 使用一份模板生成多份文件
+- 🛠️ MPA 多页面应用支持，提供 History Fallback API.
 
 ## 插件对比
 

@@ -1,0 +1,24 @@
+{
+  "name": "vite-plugin-virtual-mpa-demo",
+  "private": true,
+  "description": "Examples for vite-plugin-virtual-mpa.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emosheeep/vite-plugin-virtual-mpa",
+    "directory": "workspaces/example"
+  },
+  "bugs": {
+    "url": "https://github.com/emosheeep/vite-plugin-virtual-mpa/issues"
+  },
+  "scripts": {
+    "serve": "vite",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^3.2.0",
+    "@vitejs/plugin-vue-jsx": "2.1.0",
+    "vite": "^3.2.0",
+    "vite-plugin-virtual-mpa": "^1.2.0",
+    "vue": "^3.2.41"
+  }
+}
