@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/bundlephobia/minzip/vite-plugin-virtual-mpa" alt="package size">
 </div>
 
-Out-of-the-box MPA plugin for Vite 📦, with html template engine and virtual files support, generate multiple files using only one template.
+Out-of-box MPA plugin for Vite 📦, with html template engine and virtual files support, generate multiple files using only one template.
 
 English | [中文](./README.zh_CN.md)
 
@@ -77,7 +77,15 @@ interface WatchHandler {
     server: ViteDevServer,
     file: string,
     type: Event
-    reloadPages: (pages: []) => void
+    /**
+     * You can update the pages configuration by calling this function.
+     */
+    reloadPages: (
+      /**
+       * Your MPA core configurations, which will replace default `pages` config
+       */
+      pages: Page[]
+    ) => void
   }): void
 }
 
@@ -105,9 +113,24 @@ interface MpaOptions {
    * The `include` and `exclude` based on `Rollup.createFilter`, see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
    */
   watchOptions?: WatchHandler | {
-    include?: FilterPattern,
-    excluded?: FilterPattern,
-    events?: ('add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir')[],
+    /**
+     * Specifies the files to **include**, based on `Rollup.createFilter`
+     * @see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
+     */
+    include?: Exclude<FilterPattern, null>,
+    /**
+     * Specifies the files to **exclude**, based on `Rollup.createFilter`
+     * @see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
+     */
+    excluded?: Exclude<FilterPattern, null>,
+    /**
+     * File events you wanna deal with.
+     * @default ['add', 'unlink', 'change', 'unlinkDir', 'addDir']
+     */
+    events?: Event[],
+    /**
+     * Execute your own logic when file events fired.
+     */
     handler: WatchHandler
   },
   /**

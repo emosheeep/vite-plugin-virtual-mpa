@@ -1,8 +1,7 @@
 import { FilterPattern, ViteDevServer } from 'vite';
 import { Rewrite } from 'connect-history-api-fallback';
 
-export const AllowedEvents = ['add', 'unlink', 'change', 'unlinkDir', 'addDir'] as const;
-export type AllowedEvent = (typeof AllowedEvents)[number];
+export type AllowedEvent = 'add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir';
 
 type TplStr<T extends string> =
   T extends `/${infer P}`
@@ -22,12 +21,12 @@ export interface Page<
    */
   name: Name extends `${string}/${string}` ? never : Name;
   /**
-   * Relative path to the output directory, which should end with .html
+   * Relative path to the output directory, which should end with .html and not startWith '/'
    * @default `${name}.html`
    */
   filename?: TplStr<Filename>
   /**
-   * Higher priority template file, which will overwrite the default template.
+   * **Higher priority template file**, which will overwrite the default template.
    */
   template?: TplStr<Tpl>
   /**
@@ -45,6 +44,10 @@ type WatchHandler<Event extends AllowedEvent> = (
     server: ViteDevServer,
     file: string,
     type: Event
+    /**
+     * You can update the pages configuration by calling this function.
+     * @params pages Your MPA core configurations, which will replace default `pages` config
+     */
     reloadPages: <
       PN extends string,
       PFN extends string,
@@ -54,9 +57,24 @@ type WatchHandler<Event extends AllowedEvent> = (
 ) => void;
 
 export interface WatchOptions<Event extends AllowedEvent>{
+  /**
+   * Specifies the files to **include**, based on `Rollup.createFilter`
+   * @see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
+   */
   include?: Exclude<FilterPattern, null>,
+  /**
+   * Specifies the files to **exclude**, based on `Rollup.createFilter`
+   * @see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
+   */
   excluded?: Exclude<FilterPattern, null>,
+  /**
+   * File events you wanna deal with.
+   * @default ['add', 'unlink', 'change', 'unlinkDir', 'addDir']
+   */
   events?: Event[],
+  /**
+   * Execute your own logic when file events fired.
+   */
   handler: WatchHandler<Event>
 }
 
@@ -68,12 +86,12 @@ export interface MpaOptions<
   TPL extends string,
 > {
   /**
-   * whether to print log
+   * Whether to print log.
    * @default true
    */
   verbose?: boolean
   /**
-   * default template file
+   * Default template file.
    * @default index.html
    */
   template?: TplStr<TPL>
@@ -86,8 +104,6 @@ export interface MpaOptions<
    * Sometimes you might want to reload `pages` config or restart ViteDevServer when
    * there are some files added, removed, changed and so on. You can set `watchOptions` to
    * customize your own logic.
-   *
-   * The `include` and `exclude` based on `Rollup.createFilter`, see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
    */
   watchOptions?: WatchHandler<Event> | WatchOptions<Event>,
   /**
