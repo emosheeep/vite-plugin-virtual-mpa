@@ -5,7 +5,7 @@ import { readFileSync } from 'fs';
 import history from 'connect-history-api-fallback';
 import { name as pkgName } from '../package.json';
 import { Plugin, normalizePath, createFilter } from 'vite';
-import { MpaOptions, AllowedEvent, Page, WatchOptions } from './utils';
+import { MpaOptions, AllowedEvent, Page, WatchOptions } from './api-types';
 
 const bodyInject = /<\/body>/;
 const pluginName = color.cyan(pkgName);

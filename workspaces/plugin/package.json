@@ -1,12 +1,12 @@
 {
   "name": "vite-plugin-virtual-mpa",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "license": "MIT",
   "author": "秦旭洋",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "types/src/index.d.ts",
-  "description": "Out-of-the-box MPA plugin for Vite, with html template engine and virtual files support.",
+  "description": "Out-of-box MPA plugin for Vite, with html template engine and virtual files support.",
   "homepage": "https://github.com/emosheeep/vite-plugin-virtual-mpa/tree/master/workspaces/plugin#readme",
   "repository": {
     "type": "git",
@@ -27,7 +27,10 @@
     "vite",
     "vite-plugin",
     "virtual",
+    "virtual-html",
     "html",
+    "html-mpa",
+    "html-template",
     "mpa",
     "multi",
     "multi-page"

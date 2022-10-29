@@ -74,7 +74,7 @@ export default defineConfig({
         include: ['fruits/**'],
         handler: (ctx) => {
           console.log(ctx.type, ctx.file);
-          // ctx.reloadPages()
+          // ctx.reloadPages();
         },
       },
     }),

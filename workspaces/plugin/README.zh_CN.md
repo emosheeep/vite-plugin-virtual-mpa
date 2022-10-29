@@ -77,7 +77,11 @@ interface WatchHandler {
     server: ViteDevServer,
     file: string,
     type: Event
-    reloadPages: (pages: []) => void
+    /**
+     * 可以调用这个方法更新页面配置
+     * @params pages MPA 页面核心配置，这将会替换默认的 `pages`
+     */
+    reloadPages: (pages: Page[]) => void
   }): void
 }
 
@@ -104,9 +108,24 @@ interface MpaOptions {
    * 配置项中 `include` 和 `exclude` 基于 `Rollup.createFilter`, 详见 https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
    */
   watchOptions?: WatchHandler | {
-    include?: FilterPattern,
-    excluded?: FilterPattern,
-    events?: ('add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir')[],
+    /**
+     * 指定需要**包含**的文件，基于 `Rollup.createFilter` 过滤
+     * @see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
+     */
+    include?: Exclude<FilterPattern, null>,
+    /**
+     * 指定需要**排除**的文件，基于 `Rollup.createFilter` 过滤
+     * @see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
+     */
+    excluded?: Exclude<FilterPattern, null>,
+    /**
+     * 想要监听的文件事件
+     * @default ['add', 'unlink', 'change', 'unlinkDir', 'addDir']
+     */
+    events?: Event[],
+    /**
+     * 定义的文件事件触发后，执行自定义逻辑
+     */
     handler: WatchHandler
   },
   pages: Array<{
