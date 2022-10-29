@@ -4,6 +4,7 @@
   <a href="https://npmjs.com/package/vite-plugin-virtual-mpa">
     <img src="https://img.shields.io/npm/v/vite-plugin-virtual-mpa" alt="npm package">
   </a>
+  <img alt="Publish Package" src="https://github.com/emosheeep/vite-plugin-virtual-mpa/actions/workflows/npm-publish.yml/badge.svg">
   <img src="https://img.shields.io/npm/dt/vite-plugin-virtual-mpa" alt="npm downloads">
   <img src="https://img.shields.io/npm/l/vite-plugin-virtual-mpa" alt="npm downloads">
   <img src="https://img.shields.io/bundlephobia/minzip/vite-plugin-virtual-mpa" alt="package size">
@@ -17,8 +18,8 @@ English | [中文](./README.zh_CN.md)
 
 - 💡 EJS Template Capability
 - 💡 Fully Typed APIs, Tiny and Pretty.
-- 🛠️ Customize the path of generated files, generate multiple files using only one template
-- 🛠️ MPA support & History Fallback API
+- 🛠️ Customize the path of generated files, generate multiple files using only one template.
+- 🛠️ MPA support & History Fallback API.
 
 ## Motivation
 
