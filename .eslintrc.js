@@ -1,4 +1,6 @@
-module.exports = {
+const { defineConfig } = require('eslint-define-config');
+
+module.exports = defineConfig({
   env: {
     es2021: true,
     node: true,
@@ -16,6 +18,7 @@ module.exports = {
     indent: 'off',
     'comma-dangle': 'off',
     'space-before-function-paren': 'off',
+    '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
@@ -28,4 +31,4 @@ module.exports = {
       asyncArrow: 'always',
     }],
   },
-};
+});
