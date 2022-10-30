@@ -16,7 +16,7 @@
 ## 主要功能
 
 - 💡 EJS 模板渲染
-- 💡 完备的 TypeScript 类型支持，是一款小而美的插件
+- 💡 完备的 TypeScript 类型提示支持，是一款小而美的插件
 - 🛠️ 自定义模板HTML文件的输出路径, 使用一份模板生成多份文件
 - 🛠️ MPA 多页面应用支持，提供 History Fallback API.
 
@@ -104,8 +104,6 @@ interface MpaOptions {
   /**
    * 当项目目录下有一些文件触发相应的事件如添加、删除、修改时，你可能想要重新加载 `pages` 配置 或 重启 ViteDevServer。
    * 你可以通过设置 `watchOptions` 来实现这一目的。
-   *
-   * 配置项中 `include` 和 `exclude` 基于 `Rollup.createFilter`, 详见 https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
    */
   watchOptions?: WatchHandler | {
     /**

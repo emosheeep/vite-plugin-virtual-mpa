@@ -17,7 +17,7 @@ English | [中文](./README.zh_CN.md)
 ## Features
 
 - 💡 EJS Template Capability
-- 💡 Fully Typed APIs, Tiny and Pretty.
+- 💡 Fully Typed APIs and Prompts, Tiny and Pretty.
 - 🛠️ Customize the path of generated files, generate multiple files using only one template.
 - 🛠️ MPA support & History Fallback API.
 
@@ -80,13 +80,9 @@ interface WatchHandler {
     type: Event
     /**
      * You can update the pages configuration by calling this function.
+     * @params pages Your MPA core configurations, which will replace default `pages` config
      */
-    reloadPages: (
-      /**
-       * Your MPA core configurations, which will replace default `pages` config
-       */
-      pages: Page[]
-    ) => void
+    reloadPages: (pages: Page[]) => void
   }): void
 }
 
@@ -110,8 +106,6 @@ interface MpaOptions {
    * Sometimes you might want to reload `pages` config or restart ViteDevServer when
    * there are some files added, removed, changed and so on. You can set `watchOptions` to
    * customize your own logic.
-   *
-   * The `include` and `exclude` based on `Rollup.createFilter`, see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
    */
   watchOptions?: WatchHandler | {
     /**
