@@ -1,8 +1,8 @@
 <template>
   <div>This is Banana App</div>
-  <a target="_self" href="/sites/apple">apple</a>
+  <a target="_self" href="/apple">apple</a>
   <span>|</span>
-  <a target="_self" href="/sites">home</a>
+  <a target="_self" href="/">home</a>
   <span>|</span>
-  <a target="_self" href="/sites/strawberries">strawberries</a>
+  <a target="_self" href="/strawberries">strawberries</a>
 </template>

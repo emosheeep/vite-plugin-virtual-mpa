@@ -1,8 +1,8 @@
 <template>
   <div>This is Apple App</div>
-  <a target="_self" href="/sites">home</a>
+  <a target="_self" href="/">home</a>
   <span>|</span>
-  <a target="_self" href="/sites/banana">banana</a>
+  <a target="_self" href="/banana">banana</a>
   <span>|</span>
-  <a target="_self" href="/sites/strawberries">strawberries</a>
+  <a target="_self" href="/strawberries">strawberries</a>
 </template>
