@@ -1,3 +1,7 @@
+# 1.2.2
+
+- Expose all types for using. [#4](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/4)
+
 # 1.2.1
 
 - Improve typings and add comments for a better prompts
