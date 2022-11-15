@@ -3,7 +3,7 @@ import { Rewrite } from 'connect-history-api-fallback';
 
 export type AllowedEvent = 'add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir';
 
-type TplStr<T extends string> =
+export type TplStr<T extends string> =
   T extends `/${infer P}`
     ? TplStr<P>
     : T extends `${infer Q}.html`
@@ -39,7 +39,7 @@ export interface Page<
   data?: Record<string, any>
 }
 
-type WatchHandler<Event extends AllowedEvent> = (
+export type WatchHandler<Event extends AllowedEvent = AllowedEvent> = (
   ctx: {
     server: ViteDevServer,
     file: string,
@@ -56,7 +56,7 @@ type WatchHandler<Event extends AllowedEvent> = (
   }
 ) => void;
 
-export interface WatchOptions<Event extends AllowedEvent>{
+export interface WatchOptions<Event extends AllowedEvent = AllowedEvent>{
   /**
    * Specifies the files to **include**, based on `Rollup.createFilter`
    * @see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
@@ -79,11 +79,11 @@ export interface WatchOptions<Event extends AllowedEvent>{
 }
 
 export interface MpaOptions<
-  PN extends string,
-  PFN extends string,
-  PT extends string,
+  PageName extends string,
+  PageFilename extends string,
+  PageTpl extends string,
   Event extends AllowedEvent,
-  TPL extends string,
+  DefTpl extends string,
 > {
   /**
    * Whether to print log.
@@ -94,7 +94,7 @@ export interface MpaOptions<
    * Default template file.
    * @default index.html
    */
-  template?: TplStr<TPL>
+  template?: TplStr<DefTpl>
   /**
    * Configure your rewrite rules, only proceed fallback html requests.
    * see: https://github.com/bripkens/connect-history-api-fallback
@@ -109,5 +109,5 @@ export interface MpaOptions<
   /**
    * Your MPA core configurations
    */
-  pages: Page<PN, PFN, PT>[]
+  pages: Page<PageName, PageFilename, PageTpl>[]
 }
