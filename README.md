@@ -19,7 +19,7 @@ Out-of-box MPA plugin for Vite 📦, with html template engine and virtual files
 - 🛠️ Customize the path of generated files, generate multiple files using only one template.
 - 🛠️ MPA support & History Fallback API.
 
-# Detail
+## Detail
 
 This is a pnpm monorepo for vite-plugin-virtual-mpa, and there are two main workspaces that:
 
@@ -30,3 +30,6 @@ This is a pnpm monorepo for vite-plugin-virtual-mpa, and there are two main work
 ```
 
 Prefer to check corresponding directory for more info.
+
+- [workspaces/example](https://github.com/emosheeep/vite-plugin-virtual-mpa/tree/HEAD/workspaces/example)
+- [workspaces/plugin](https://github.com/emosheeep/vite-plugin-virtual-mpa/tree/HEAD/workspaces/plugin)
