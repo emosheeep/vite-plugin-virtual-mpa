@@ -4,7 +4,8 @@ import color from 'cli-color';
 import { readFileSync } from 'fs';
 import history from 'connect-history-api-fallback';
 import { name as pkgName } from '../package.json';
-import { Plugin, normalizePath, createFilter } from 'vite';
+import { Plugin, normalizePath, createFilter, loadEnv } from 'vite';
+import type { ResolvedConfig } from 'vite';
 import { MpaOptions, AllowedEvent, Page, WatchOptions } from './api-types';
 
 const bodyInject = /<\/body>/;
@@ -27,6 +28,8 @@ export function createMpaPlugin<
     rewrites,
     watchOptions,
   } = config;
+  let env: Record<string, string>;
+  let resolvedConfig: ResolvedConfig;
 
   type CommonPage = Page<string, string, string>;
   let inputMap: Record<string, string> = {};
@@ -74,13 +77,18 @@ export function createMpaPlugin<
             `${page.entry}`,
           )}"></script>\n</body>`,
         ),
-      page.data,
+      {
+        ...env,
+        ...resolvedConfig.define,
+        ...page.data,
+      },
     );
   }
 
   return {
     name: pluginName,
-    config() {
+    config(userConfig, { mode }) {
+      env = loadEnv(mode, process.cwd());
       configInit(config.pages); // 初始化
 
       return {
@@ -99,6 +107,7 @@ export function createMpaPlugin<
       };
     },
     configResolved(config) {
+      resolvedConfig = config;
       if (verbose) {
         const colorProcess = path => normalizePath(`<${color.blue(config.build.outDir)}>/${color.green(path)}`);
         const inputFiles = Object.values(inputMap).map(colorProcess);
