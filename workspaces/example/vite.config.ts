@@ -8,6 +8,9 @@ const base = '/'; // You can change whatever you want
 // https://vitejs.dev/config/
 export default defineConfig({
   base,
+  define: {
+    __APP_VERSION__: '1.0',
+  },
   plugins: [
     vue(),
     vueJsx(),
