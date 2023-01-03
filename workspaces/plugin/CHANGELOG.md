@@ -1,3 +1,7 @@
+# 1.3.0
+
+- feat: inject `env` variables into ejs template by default. [#8](https://github.com/emosheeep/vite-plugin-virtual-mpa/pull/8)
+
 # 1.2.2
 
 - Expose all types for using. [#4](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/4)

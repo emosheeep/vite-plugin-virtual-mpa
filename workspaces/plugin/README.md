@@ -248,3 +248,7 @@ Usually during development, our files are written locally, and we can access the
 The plugin generates virtual files using the template system, allowing you to **reach the in-memory virtual files** at development time and generate them in the corresponding directory at build time. 
  
 It's perfectly okay to think that these virtual files are really exist, and it will help you build an intuition about them in your mind to be able to write your proxy configuration correctly.
+
+## About EJS template engine
+
+Except for the `data` provided in the page configuration, ENV variables that start with `'VITE_'` will be auto injected into the provided template. More information about `envprefix` can be found [here](https://vitejs.dev/config/shared-options.html#envprefix).
