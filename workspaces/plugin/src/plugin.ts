@@ -78,7 +78,6 @@ export function createMpaPlugin<
         ),
       {
         ...resolvedConfig.env,
-        ...resolvedConfig.define,
         ...page.data,
       },
     );
