@@ -4,7 +4,7 @@ import color from 'cli-color';
 import { readFileSync } from 'fs';
 import history from 'connect-history-api-fallback';
 import { name as pkgName } from '../package.json';
-import { Plugin, normalizePath, createFilter, loadEnv } from 'vite';
+import { Plugin, normalizePath, createFilter } from 'vite';
 import type { ResolvedConfig } from 'vite';
 import { MpaOptions, AllowedEvent, Page, WatchOptions } from './api-types';
 
@@ -28,7 +28,6 @@ export function createMpaPlugin<
     rewrites,
     watchOptions,
   } = config;
-  let env: Record<string, string>;
   let resolvedConfig: ResolvedConfig;
 
   type CommonPage = Page<string, string, string>;
@@ -78,7 +77,7 @@ export function createMpaPlugin<
           )}"></script>\n</body>`,
         ),
       {
-        ...env,
+        ...resolvedConfig.env,
         ...resolvedConfig.define,
         ...page.data,
       },
@@ -87,8 +86,7 @@ export function createMpaPlugin<
 
   return {
     name: pluginName,
-    config(userConfig, { mode }) {
-      env = loadEnv(mode, process.cwd());
+    config() {
       configInit(config.pages); // 初始化
 
       return {
