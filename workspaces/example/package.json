@@ -15,10 +15,10 @@
     "build": "vite build"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^3.2.0",
-    "@vitejs/plugin-vue-jsx": "2.1.0",
-    "vite": "^3.2.0",
-    "vite-plugin-virtual-mpa": "^1.2.1",
-    "vue": "^3.2.41"
+    "@vitejs/plugin-vue": "^4.0.0",
+    "@vitejs/plugin-vue-jsx": "^3.0.0",
+    "vite": "^4.0.4",
+    "vite-plugin-virtual-mpa": "^1.2.2",
+    "vue": "^3.2.45"
   }
 }
