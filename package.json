@@ -1,5 +1,5 @@
 {
-  "name": "@emosheep/vite-plugin",
+  "name": "@emo/vite-plugin",
   "private": true,
   "description": "This is a monorepo for vite-plugin-mpa",
   "keywords": [
@@ -18,17 +18,17 @@
     "lint": "eslint . --fix --ext .js,.ts"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.41.0",
-    "@typescript-eslint/parser": "^5.41.0",
-    "eslint": "^8.26.0",
+    "@typescript-eslint/eslint-plugin": "^5.48.0",
+    "@typescript-eslint/parser": "^5.48.0",
+    "eslint": "^8.31.0",
     "eslint-config-standard": "^17.0.0",
-    "eslint-define-config": "^1.8.0",
+    "eslint-define-config": "^1.13.0",
     "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-n": "^15.3.0",
+    "eslint-plugin-n": "^15.6.0",
     "eslint-plugin-promise": "^6.1.1",
-    "husky": "^8.0.1",
-    "lint-staged": "^13.0.3",
-    "typescript": "*"
+    "husky": "^8.0.3",
+    "lint-staged": "^13.1.0",
+    "typescript": "^4.9.4"
   },
   "packageManager": "pnpm@7.14.0",
   "pnpm": {
