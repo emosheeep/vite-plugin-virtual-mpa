@@ -11,9 +11,9 @@ export type TplStr<T extends string> =
       : `${T}.html`;
 
 export interface Page<
-  Name extends string,
-  Filename extends string,
-  Tpl extends string,
+  Name extends string = string,
+  Filename extends string = string,
+  Tpl extends string = string,
 > {
   /**
    * Required. Name is used to generate default rewrite rules, it just a common string and please don't include '/'.
