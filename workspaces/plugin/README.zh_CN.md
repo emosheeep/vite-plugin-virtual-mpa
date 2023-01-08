@@ -1,12 +1,15 @@
 # vite-plugin-virtual-mpa ⚡
 
 <div style="display: flex;">
-  <a href="https://npmjs.com/package/vite-plugin-virtual-mpa">
+  <a href="https://npmjs.com/package/vite-plugin-virtual-mpa" target="_blank">
     <img src="https://img.shields.io/npm/v/vite-plugin-virtual-mpa" alt="npm package">
   </a>
+  <img alt="Publish Package" src="https://github.com/emosheeep/vite-plugin-virtual-mpa/actions/workflows/npm-publish.yml/badge.svg">
   <img src="https://img.shields.io/npm/dt/vite-plugin-virtual-mpa" alt="npm downloads">
   <img src="https://img.shields.io/npm/l/vite-plugin-virtual-mpa" alt="npm downloads">
-  <img src="https://img.shields.io/bundlephobia/minzip/vite-plugin-virtual-mpa" alt="package size">
+  <a href="https://packagephobia.com/result?p=vite-plugin-virtual-mpa" target="_blank">
+    <img src="https://packagephobia.com/badge?p=vite-plugin-virtual-mpa" alt="install size">
+  </a>
 </div>
 
 开箱即用的 Vite MPA插件 📦，支持HTML模板引擎和虚拟文件功能，能够使用一份模板生成多个文件。
@@ -54,18 +57,37 @@ pnpm add -D vite-plugin-virtual-mpa # or npm/yarn
 
 ```ts
 // vite.config.ts
-import { createMpaPlugin } from 'vite-plugin-virtual-mpa'
+import { createMpaPlugin, createPages } from 'vite-plugin-virtual-mpa'
 
 // @see https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     createMpaPlugin({
       pages: [
-        // your configuration
+        // 你可以直接在这里书写页面配置，也可以单独使用 `createPages` 函数并将结果传递到这里。
       ]
     }),
   ],
 })
+
+/**
+ * 该函数仅仅是将参数转换为一个 pages 数组。
+ * 它帮助你在插件之外创建页面配置，主要是为了能够拥有类型提示。
+ * 同时在别处统一管理配置的方式可能也能帮助你简化 vite 的配置文件。
+ */
+const pages = createPages([
+  // 你可以传递一个 page 对象或一个 pages 数组。
+])
+
+// @see https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [
+    createMpaPlugin({
+      pages,
+    }),
+  ],
+})
+
 ```
 
 ## Options

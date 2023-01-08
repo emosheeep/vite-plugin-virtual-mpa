@@ -1,13 +1,15 @@
 # vite-plugin-virtual-mpa ⚡
 
 <div style="display: flex;">
-  <a href="https://npmjs.com/package/vite-plugin-virtual-mpa">
+  <a href="https://npmjs.com/package/vite-plugin-virtual-mpa" target="_blank">
     <img src="https://img.shields.io/npm/v/vite-plugin-virtual-mpa" alt="npm package">
   </a>
   <img alt="Publish Package" src="https://github.com/emosheeep/vite-plugin-virtual-mpa/actions/workflows/npm-publish.yml/badge.svg">
   <img src="https://img.shields.io/npm/dt/vite-plugin-virtual-mpa" alt="npm downloads">
   <img src="https://img.shields.io/npm/l/vite-plugin-virtual-mpa" alt="npm downloads">
-  <img src="https://img.shields.io/bundlephobia/minzip/vite-plugin-virtual-mpa" alt="package size">
+  <a href="https://packagephobia.com/result?p=vite-plugin-virtual-mpa" target="_blank">
+    <img src="https://packagephobia.com/badge?p=vite-plugin-virtual-mpa" alt="install size">
+  </a>
 </div>
 
 Out-of-box MPA plugin for Vite 📦, with html template engine and virtual files support, generate multiple files using only one template.
@@ -55,15 +57,36 @@ pnpm add -D vite-plugin-virtual-mpa # or npm/yarn
 
 ```ts
 // vite.config.ts
-import { createMpaPlugin } from 'vite-plugin-virtual-mpa'
+import { createMpaPlugin, createPages } from 'vite-plugin-virtual-mpa'
 
 // @see https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     createMpaPlugin({
       pages: [
-        // your configuration
+        /** 
+         * You can write pages configuration here directly. 
+         * Or use `createPages` function independently outside and then pass result to this field.
+         */
       ]
+    }),
+  ],
+})
+
+/**
+ * This function simply converts the arguments to an array and returns them.
+ * It helps creating pages configuration with type hints independently outside plugin function.
+ * It may also simplify your configurations because you can manage them uniformly somewhere.
+ */
+const pages = createPages([
+  // You can pass a single page object or a pages array.
+])
+
+// @see https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [
+    createMpaPlugin({
+      pages,
     }),
   ],
 })
