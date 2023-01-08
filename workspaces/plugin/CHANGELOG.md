@@ -1,3 +1,7 @@
+# 1.4.0
+
+- feat: Add `createPages` utility function to help creating `pages` configuration independently outside plugin function. [#10](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/10)
+
 # 1.3.0
 
 - feat: inject `env` variables into ejs template by default. [#8](https://github.com/emosheeep/vite-plugin-virtual-mpa/pull/8)

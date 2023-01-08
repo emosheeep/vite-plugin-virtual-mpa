@@ -31,6 +31,7 @@ export interface Page<
   template?: TplStr<Tpl>
   /**
    * Entry file that will append to body, which you should remove from the html template file.
+   * It must always start with `'/'` which represents your project root directory.
    */
   entry?: `/${string}`
   /**
@@ -107,7 +108,7 @@ export interface MpaOptions<
    */
   watchOptions?: WatchHandler<Event> | WatchOptions<Event>,
   /**
-   * Your MPA core configurations
+   * Your MPA core configurations, you can write directly or use `createPages` function independently outside and then pass it to this field.
    */
   pages: Page<PageName, PageFilename, PageTpl>[]
 }

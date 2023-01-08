@@ -1,9 +1,46 @@
 import { defineConfig, normalizePath } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
-import { createMpaPlugin } from 'vite-plugin-virtual-mpa';
+import { createMpaPlugin, createPages } from 'vite-plugin-virtual-mpa';
 
 const base = '/'; // You can change whatever you want
+
+const pages = createPages([
+  {
+    name: 'apple',
+    /**
+     * filename is optional, default is `${name}.html`, which is the relative path of `build.outDir`.
+     */
+    filename: 'fruits/apple.html', // output into sites/fruits/apple.html at build time.
+    entry: '/pages/apple/apple.js',
+    data: {
+      title: 'This is Apple page',
+    },
+  },
+  {
+    name: 'banana',
+    filename: 'fruits/banana.html',
+    entry: '/pages/banana/banana.js',
+    data: {
+      title: 'This is Banana page',
+    },
+  },
+  {
+    name: 'strawberries',
+    filename: 'fruits/strawberries.html',
+    entry: '/pages/strawberries/strawberries.js',
+    data: {
+      title: 'This is Strawberries page',
+    },
+  },
+  {
+    name: 'index',
+    entry: '/pages/home/index.js',
+    data: {
+      title: 'This is Home page',
+    },
+  },
+]);
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -12,42 +49,11 @@ export default defineConfig({
     vue(),
     vueJsx(),
     createMpaPlugin({
-      pages: [
-        {
-          name: 'apple',
-          /**
-           * filename is optional, default is `${name}.html`, which is the relative path of `build.outDir`.
-           */
-          filename: 'fruits/apple.html', // output into sites/fruits/apple.html at build time.
-          entry: '/pages/apple/apple.js',
-          data: {
-            title: 'This is Apple page',
-          },
-        },
-        {
-          name: 'banana',
-          filename: 'fruits/banana.html',
-          entry: '/pages/banana/banana.js',
-          data: {
-            title: 'This is Banana page',
-          },
-        },
-        {
-          name: 'strawberries',
-          filename: 'fruits/strawberries.html',
-          entry: '/pages/strawberries/strawberries.js',
-          data: {
-            title: 'This is Strawberries page',
-          },
-        },
-        {
-          name: 'index',
-          entry: '/pages/home/index.js',
-          data: {
-            title: 'This is Home page',
-          },
-        },
-      ],
+      /**
+       * You can write directly or use `createPages` function independently outside and then pass it to this field.
+       * Both of the above can enjoy type hints.
+       */
+      pages,
       /**
        * Customize the history fallback rewrite rules.
        * If you config your pages as above, this rewrite rules will be automatically generated.
