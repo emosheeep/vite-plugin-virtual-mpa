@@ -214,9 +214,15 @@ export function createMpaPlugin<
           return;
         }
 
-        // https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/12
+        /**
+         * The following 2 lines fixed #12.
+         * When using cypress for e2e test, we should manually set response header and status code.
+         * Otherwise, it causes cypress testing process of cross-entry-page jumping hanging, which results in a timeout error.
+         * @see https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/12
+         */
         res.setHeader('Content-Type', 'text/html');
         res.statusCode = 200;
+
         res.end(
           await transformIndexHtml(
             url,
