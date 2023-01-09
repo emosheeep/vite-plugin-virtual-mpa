@@ -214,6 +214,8 @@ export function createMpaPlugin<
           return;
         }
 
+        res.setHeader('Content-Type', 'text/html');
+        res.statusCode = 200;
         res.end(
           await transformIndexHtml(
             url,
