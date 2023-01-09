@@ -214,6 +214,7 @@ export function createMpaPlugin<
           return;
         }
 
+        // https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/12
         res.setHeader('Content-Type', 'text/html');
         res.statusCode = 200;
         res.end(
