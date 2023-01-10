@@ -175,6 +175,10 @@ export function createMpaPlugin<
               from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).join('|')})`)),
               to: ctx => normalizePath(`/${inputMap[ctx.match[1]]}`),
             },
+            {
+              from: new RegExp(base),
+              to: () => normalizePath(`/${base}/index.html`),
+            },
           ]),
         }),
       );
@@ -203,8 +207,7 @@ export function createMpaPlugin<
         }
 
         if (!virtualPageMap[fileName]) {
-          next();
-          return;
+          return next();
         }
 
         /**
