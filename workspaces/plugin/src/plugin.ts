@@ -176,8 +176,11 @@ export function createMpaPlugin<
               to: ctx => normalizePath(`/${inputMap[ctx.match[1]]}`),
             },
             {
-              from: new RegExp(base),
-              to: () => normalizePath(`/${base}/index.html`),
+              from: /.*/,
+              to: ctx => {
+                const { parsedUrl: { pathname } } = ctx;
+                return normalizePath(pathname?.endsWith('.html') ? pathname : `${pathname}/index.html`);
+              },
             },
           ]),
         }),
