@@ -9,7 +9,7 @@ import { MpaOptions, AllowedEvent, Page, WatchOptions } from './api-types';
 
 const bodyInject = /<\/body>/;
 const pluginName = color.cyan(pkgName);
-const issuePath = color.blue('https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/new');
+// const issuePath = color.blue('https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/new');
 
 export function createMpaPlugin<
   PN extends string,
