@@ -9,7 +9,7 @@ import { MpaOptions, AllowedEvent, Page, WatchOptions } from './api-types';
 
 const bodyInject = /<\/body>/;
 const pluginName = color.cyan(pkgName);
-const issuePath = color.blue('https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/new');
+// const issuePath = color.blue('https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/new');
 
 export function createMpaPlugin<
   PN extends string,
@@ -175,6 +175,13 @@ export function createMpaPlugin<
               from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).join('|')})`)),
               to: ctx => normalizePath(`/${inputMap[ctx.match[1]]}`),
             },
+            {
+              from: /.*/,
+              to: ctx => {
+                const { parsedUrl: { pathname } } = ctx;
+                return normalizePath(pathname?.endsWith('.html') ? pathname : `${pathname}/index.html`);
+              },
+            },
           ]),
         }),
       );
@@ -203,15 +210,7 @@ export function createMpaPlugin<
         }
 
         if (!virtualPageMap[fileName]) {
-          if (fileName.startsWith('/')) {
-            console.log(
-              `[${pluginName}]: ${color.red(`filename shouldn't startsWith '/', but received '${fileName}', which may be a bug`)}.`,
-              `Please report it at ${issuePath}, thanks!`,
-            );
-          }
-          res.write(`[${pluginName}]: Missing corresponding entry file '${rewritten}', please check your rewrite rules!`);
-          res.end();
-          return;
+          return next();
         }
 
         /**
