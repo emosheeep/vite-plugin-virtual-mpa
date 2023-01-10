@@ -203,14 +203,7 @@ export function createMpaPlugin<
         }
 
         if (!virtualPageMap[fileName]) {
-          if (fileName.startsWith('/')) {
-            console.log(
-              `[${pluginName}]: ${color.red(`filename shouldn't startsWith '/', but received '${fileName}', which may be a bug`)}.`,
-              `Please report it at ${issuePath}, thanks!`,
-            );
-          }
-          res.write(`[${pluginName}]: Missing corresponding entry file '${rewritten}', please check your rewrite rules!`);
-          res.end();
+          next();
           return;
         }
 
