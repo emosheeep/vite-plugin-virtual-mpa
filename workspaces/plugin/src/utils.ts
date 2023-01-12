@@ -8,6 +8,6 @@ export function createPages<
   Name extends string,
   Filename extends string,
   Tpl extends string,
->(pages: Page<Name, Filename, Tpl> | Page<Name, Filename, Tpl>[]) {
+>(pages: Page<Name, Filename, Tpl> | Page<Name, Filename, Tpl>[]): Page[] {
   return Array.isArray(pages) ? pages : [pages];
 }
