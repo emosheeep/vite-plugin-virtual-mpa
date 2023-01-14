@@ -9,7 +9,6 @@ import { MpaOptions, AllowedEvent, Page, WatchOptions } from './api-types';
 
 const bodyInject = /<\/body>/;
 const pluginName = color.cyan(pkgName);
-// const issuePath = color.blue('https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/new');
 
 export function createMpaPlugin<
   PN extends string,
@@ -210,12 +209,12 @@ export function createMpaPlugin<
         }
 
         if (!virtualPageMap[fileName]) {
-          return next();
+          return next(); // This allows vite handling unmatched paths.
         }
 
         /**
          * The following 2 lines fixed #12.
-         * When using cypress for e2e test, we should manually set response header and status code.
+         * When using cypress for e2e testing, we should manually set response header and status code.
          * Otherwise, it causes cypress testing process of cross-entry-page jumping hanging, which results in a timeout error.
          * @see https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/12
          */
