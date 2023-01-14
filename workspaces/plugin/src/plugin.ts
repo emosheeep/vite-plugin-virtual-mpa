@@ -33,7 +33,7 @@ export function createMpaPlugin<
   let virtualPageMap: Record<string, CommonPage> = {};
 
   /**
-   * 更新页面配置
+   * Update pages configurations.
    */
   function configInit(pages: CommonPage[]) {
     const [tempInputMap, tempVirtualPageMap]: [typeof inputMap, typeof virtualPageMap] = [{}, {}];
@@ -52,14 +52,14 @@ export function createMpaPlugin<
       tempVirtualPageMap[entryPath] = page;
     }
     /**
-     * 使用新配置直接替换旧的配置
+     * Use new configurations instead of the old.
      */
     inputMap = tempInputMap;
     virtualPageMap = tempVirtualPageMap;
   }
 
   /**
-   * 模板文件处理
+   * Template file transform.
    */
   function transform(fileContent, id) {
     const page = virtualPageMap[id];
@@ -81,7 +81,7 @@ export function createMpaPlugin<
   return {
     name: pluginName,
     config() {
-      configInit(config.pages); // 初始化
+      configInit(config.pages); // Init
 
       return {
         appType: 'mpa',
@@ -107,7 +107,7 @@ export function createMpaPlugin<
       }
     },
     /**
-     * 拦截html请求
+     * Intercept html requests.
      */
     resolveId(id, importer, options) {
       if (options.isEntry && virtualPageMap[id]) {
@@ -115,7 +115,7 @@ export function createMpaPlugin<
       }
     },
     /**
-     * 根据配置映射html文件
+     * Get html according to page configurations.
      */
     load(id) {
       const page = virtualPageMap[id];
@@ -189,7 +189,7 @@ export function createMpaPlugin<
         const accept = req.headers.accept;
         const url = req.url!;
 
-        // 忽略非入口html请求
+        // Ignore request that are not html.
         if (
           res.writableEnded ||
           accept === '*/*' ||
@@ -198,10 +198,11 @@ export function createMpaPlugin<
           return next();
         }
 
-        // 统一路径，允许直接通过url访问虚拟文件
+        // Uniform the request url, allows visiting files directly.
         const rewritten = url.startsWith(base) ? url : normalizePath(`/${base}/${url}`);
-        const fileName = rewritten.replace(base, ''); // 文件名不能以'/'开头，否则无法对应到inputMap，因为inputMap的键是相对路径
+        const fileName = rewritten.replace(base, ''); // filename in page configuration can't start with '/', because the key of inputMap is relative path.
 
+        // print rewriting log if verbose is true
         if (verbose && req.originalUrl !== url) {
           console.log(
             `[${pluginName}]: Rewriting ${color.blue(req.originalUrl)} to ${color.blue(rewritten)}`,
