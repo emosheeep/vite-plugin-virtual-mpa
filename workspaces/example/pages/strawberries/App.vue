@@ -4,7 +4,7 @@
   <span>|</span>
   <a target="_self" href="/banana">banana</a>
   <span>|</span>
-  <a target="_self" href="/">home</a>
+  <a target="_self" href="/home">home</a>
 </template>
 
 <script setup lang="ts">
