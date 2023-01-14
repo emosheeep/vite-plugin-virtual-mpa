@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= title %>
+  </title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <p>
+    ENV variables that start with 'VITE_' will be auto injected into the provided template.
+    <a href="https://vitejs.dev/config/shared-options.html#envprefix" target="_blank">More</a>
+  </p>
+
+  <ul>
+    <li>
+      VITE_TEST: <%= VITE_TEST %>
+    </li>
+    <li>
+      VITE_APP_KEY: <%= VITE_APP_KEY %>
+    </li>
+  </ul>
+</body>
+
+</html>
