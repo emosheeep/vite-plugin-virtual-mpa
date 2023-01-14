@@ -28,14 +28,13 @@ export function createMpaPlugin<
   } = config;
   let resolvedConfig: ResolvedConfig;
 
-  type CommonPage = Page<string, string, string>;
   let inputMap: Record<string, string> = {};
-  let virtualPageMap: Record<string, CommonPage> = {};
+  let virtualPageMap: Record<string, Page> = {};
 
   /**
    * Update pages configurations.
    */
-  function configInit(pages: CommonPage[]) {
+  function configInit(pages: Page[]) {
     const [tempInputMap, tempVirtualPageMap]: [typeof inputMap, typeof virtualPageMap] = [{}, {}];
     for (const page of pages) {
       const entryPath = page.filename || `${page.name}.html`;
