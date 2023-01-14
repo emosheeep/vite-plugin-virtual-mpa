@@ -49,7 +49,7 @@ export default defineConfig({
     vue(),
     vueJsx(),
     createMpaPlugin({
-      template: 'template/index.html',
+      template: 'pages/template.html',
       /**
        * You can write directly or use `createPages` function independently outside and then pass it to this field.
        * Both of the above can enjoy type hints.
@@ -60,14 +60,14 @@ export default defineConfig({
        * If you config your pages as above, this rewrite rules will be automatically generated.
        * Otherwise you should manually write it, which will overwrite the default.
        */
-      // rewrites: [
-      //   {
-      //     from: new RegExp(
-      //       normalizePath(`/${base}/(apple|banana|strawberries)`),
-      //     ),
-      //     to: (ctx) => normalizePath(`/${base}/fruits/${ctx.match[1]}.html`),
-      //   },
-      // ],
+      rewrites: [
+        {
+          from: new RegExp(
+            normalizePath(`/${base}/(apple|banana|strawberries)`),
+          ),
+          to: (ctx) => normalizePath(`/${base}/fruits/${ctx.match[1]}.html`),
+        },
+      ],
       /**
        * Sometimes you might want to reload `pages` config or restart ViteDevServer when
        * there are some files added, removed, changed and so on. You can set `watchOptions` to
@@ -78,7 +78,10 @@ export default defineConfig({
        */
       watchOptions: {
         events: ['add', 'unlink', 'change'],
-        include: ['fruits/**'],
+        include: [
+          '**/pages/**',
+          '**/infos/**',
+        ],
         handler: (ctx) => {
           console.log(ctx.type, ctx.file);
           // ctx.reloadPages();
