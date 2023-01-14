@@ -1,14 +1,20 @@
+# 1.5.0
+feat: Allow vite handling unmatched paths. Closed [#15](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/15).
+
+# 1.4.1
+fix: Cypress testing process of cross-entry-page jumping hanging, which causing a timeout error. Closed [#12](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/12).
+
 # 1.4.0
 
-- feat: Add `createPages` utility function to help creating `pages` configuration independently outside plugin function. [#10](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/10)
+- feat: Add `createPages` utility function to help creating `pages` configuration independently outside plugin function. Closed [#10](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/10).
 
 # 1.3.0
 
-- feat: inject `env` variables into ejs template by default. [#8](https://github.com/emosheeep/vite-plugin-virtual-mpa/pull/8)
+- feat: inject `env` variables into ejs template by default. Merged [#8](https://github.com/emosheeep/vite-plugin-virtual-mpa/pull/8).
 
 # 1.2.2
 
-- Expose all types for using. [#4](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/4)
+- Expose all types for using. Closed [#4](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/4).
 
 # 1.2.1
 
@@ -20,7 +26,7 @@
 
 # 1.2.0-beta.0
 
-- Add `watchOptions` to allow users writing custom logic when file events fired. [#2](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/2)
+- Add `watchOptions` to allow users writing custom logic when file events fired. Closed [#2](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/2).
 
 # 1.1.0
 
