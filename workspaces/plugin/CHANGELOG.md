@@ -1,3 +1,7 @@
+# 1.6.0
+
+fix: Warnings appear when `build.sourcemap` enabled. Closed [#19](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/19).
+
 # 1.5.0
 feat: Allow vite handling unmatched paths. Closed [#15](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/15).
 

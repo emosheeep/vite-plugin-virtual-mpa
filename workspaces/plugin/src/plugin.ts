@@ -1,11 +1,12 @@
 import ejs from 'ejs';
+import color from 'picocolors';
+import fs from 'fs';
 import path from 'path';
-import color from 'cli-color';
-import { readFileSync } from 'fs';
 import history from 'connect-history-api-fallback';
 import { name as pkgName } from '../package.json';
 import { Plugin, normalizePath, createFilter, type ResolvedConfig } from 'vite';
 import { MpaOptions, AllowedEvent, Page, WatchOptions } from './api-types';
+import MagicString from 'magic-string';
 
 const bodyInject = /<\/body>/;
 const pluginName = color.cyan(pkgName);
@@ -62,19 +63,35 @@ export function createMpaPlugin<
    */
   function transform(fileContent, id) {
     const page = virtualPageMap[id];
-    if (!page) return fileContent;
+    if (!page) return null;
 
-    return ejs.render(
-      !page.entry
-        ? fileContent
-        : fileContent.replace(
-          bodyInject,
-          `<script type="module" src="${normalizePath(
-            `${page.entry}`,
-          )}"></script>\n</body>`,
-        ),
-      { ...resolvedConfig.env, ...page.data },
+    const ms = new MagicString(
+      ejs.render(
+        !page.entry
+          ? fileContent
+          : fileContent.replace(
+            bodyInject,
+            `<script type="module" src="${normalizePath(
+              `${page.entry}`,
+            )}"></script>\n</body>`,
+          ),
+        // Variables injection
+        { ...resolvedConfig.env, ...page.data },
+        // For error report
+        { filename: id, root: resolvedConfig.root },
+      ),
     );
+
+    return {
+      code: ms.toString(),
+      /**
+       * You should provide sourcemap as long as you made some modifications,
+       * otherwise it probably cause some warnings. Fix #12.
+       */
+      map: ms.generateMap({
+        source: id,
+      }),
+    };
   }
 
   return {
@@ -119,7 +136,7 @@ export function createMpaPlugin<
     load(id) {
       const page = virtualPageMap[id];
       if (!page) return null;
-      return readFileSync(page.template || template, 'utf-8');
+      return fs.readFileSync(page.template || template, 'utf-8');
     },
     transform,
     configureServer(server) {
@@ -221,13 +238,23 @@ export function createMpaPlugin<
         res.setHeader('Content-Type', 'text/html');
         res.statusCode = 200;
 
+        // load file
+        let loadResult = await pluginContainer.load(fileName);
+        if (!loadResult) {
+          throw new Error(`Failed to load url ${fileName}`);
+        }
+        loadResult = typeof loadResult === 'string'
+          ? loadResult
+          : loadResult.code;
+
+        // transform and response
+        const transformedResult = transform(loadResult, fileName);
         res.end(
           await transformIndexHtml(
             url,
-            transform(
-              await pluginContainer.load(fileName) as string,
-              fileName,
-            ),
+            transformedResult
+              ? transformedResult.code
+              : loadResult, // No transform applied, keep code as-is,
             req.originalUrl,
           ),
         );
