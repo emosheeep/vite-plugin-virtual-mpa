@@ -45,6 +45,9 @@ const pages = createPages([
 // https://vitejs.dev/config/
 export default defineConfig({
   base,
+  build: {
+    sourcemap: true,
+  },
   plugins: [
     vue(),
     vueJsx(),

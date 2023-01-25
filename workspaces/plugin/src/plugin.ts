@@ -1,7 +1,7 @@
 import ejs from 'ejs';
+import color from 'picocolors';
+import fs from 'fs';
 import path from 'path';
-import color from 'cli-color';
-import { readFileSync } from 'fs';
 import history from 'connect-history-api-fallback';
 import { name as pkgName } from '../package.json';
 import { Plugin, normalizePath, createFilter, type ResolvedConfig } from 'vite';
@@ -62,7 +62,12 @@ export function createMpaPlugin<
    */
   function transform(fileContent, id) {
     const page = virtualPageMap[id];
-    if (!page) return fileContent;
+    /**
+     * Fixed #19.
+     * Always return `null` if there're no modifications applied.
+     * Otherwise it may cause building warnings when `build.sourcemap` enabled.
+     */
+    if (!page) return null;
 
     return ejs.render(
       !page.entry
@@ -73,7 +78,10 @@ export function createMpaPlugin<
             `${page.entry}`,
           )}"></script>\n</body>`,
         ),
+      // Variables injection
       { ...resolvedConfig.env, ...page.data },
+      // For error report
+      { filename: id, root: resolvedConfig.root },
     );
   }
 
@@ -119,7 +127,7 @@ export function createMpaPlugin<
     load(id) {
       const page = virtualPageMap[id];
       if (!page) return null;
-      return readFileSync(page.template || template, 'utf-8');
+      return fs.readFileSync(page.template || template, 'utf-8');
     },
     transform,
     configureServer(server) {
@@ -221,13 +229,20 @@ export function createMpaPlugin<
         res.setHeader('Content-Type', 'text/html');
         res.statusCode = 200;
 
+        // load file
+        let loadResult = await pluginContainer.load(fileName);
+        if (!loadResult) {
+          throw new Error(`Failed to load url ${fileName}`);
+        }
+        loadResult = typeof loadResult === 'string'
+          ? loadResult
+          : loadResult.code;
+
         res.end(
           await transformIndexHtml(
             url,
-            transform(
-              await pluginContainer.load(fileName) as string,
-              fileName,
-            ),
+            // No transform applied, keep code as-is,,
+            transform(loadResult, fileName) ?? loadResult,
             req.originalUrl,
           ),
         );
