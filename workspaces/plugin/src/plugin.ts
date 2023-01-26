@@ -4,11 +4,15 @@ import fs from 'fs';
 import path from 'path';
 import history from 'connect-history-api-fallback';
 import { name as pkgName } from '../package.json';
-import { Plugin, normalizePath, createFilter, type ResolvedConfig } from 'vite';
-import { MpaOptions, AllowedEvent, Page, WatchOptions } from './api-types';
+import type { MpaOptions, AllowedEvent, Page, WatchOptions } from './api-types';
+import { type ResolvedConfig, type Plugin, normalizePath, createFilter } from 'vite';
 
 const bodyInject = /<\/body>/;
 const pluginName = color.cyan(pkgName);
+
+function throwError(message) {
+  throw new Error(`[${pluginName}]: ${color.red(message)}`);
+}
 
 export function createMpaPlugin<
   PN extends string,
@@ -30,31 +34,36 @@ export function createMpaPlugin<
 
   let inputMap: Record<string, string> = {};
   let virtualPageMap: Record<string, Page> = {};
+  let tplSet: Set<string> = new Set();
 
   /**
    * Update pages configurations.
    */
   function configInit(pages: Page[]) {
-    const [tempInputMap, tempVirtualPageMap]: [typeof inputMap, typeof virtualPageMap] = [{}, {}];
+    const tempInputMap: typeof inputMap = {};
+    const tempVirtualPageMap: typeof virtualPageMap = {};
+    const tempTplSet: typeof tplSet = new Set([template]);
+
     for (const page of pages) {
       const entryPath = page.filename || `${page.name}.html`;
-      if (entryPath.startsWith('/')) {
-        throw new Error(`[${pluginName}]: Make sure the path relative, received '${entryPath}'`);
-      }
-      if (page.name.includes('/')) {
-        throw new Error(`[${pluginName}]: Page name shouldn't include '/', received '${page.name}'`);
-      }
+      if (entryPath.startsWith('/')) throwError(`Make sure the path relative, received '${entryPath}'`);
+      if (page.name.includes('/')) throwError(`Page name shouldn't include '/', received '${page.name}'`);
       if (page.entry && !page.entry.startsWith('/')) {
-        throw new Error(`[${pluginName}]: Entry must be an absolute path relative to the project root, received '${page.name}'`);
+        throwError(
+          `Entry must be an absolute path relative to the project root, received '${page.entry}'`,
+        );
       }
+
       tempInputMap[page.name] = entryPath;
       tempVirtualPageMap[entryPath] = page;
+      page.template && tempTplSet.add(page.template);
     }
     /**
      * Use new configurations instead of the old.
      */
     inputMap = tempInputMap;
     virtualPageMap = tempVirtualPageMap;
+    tplSet = tempTplSet;
   }
 
   /**
@@ -108,13 +117,13 @@ export function createMpaPlugin<
     configResolved(config) {
       resolvedConfig = config;
       if (verbose) {
-        const colorProcess = path => normalizePath(`<${color.blue(config.build.outDir)}>/${color.green(path)}`);
+        const colorProcess = path => normalizePath(`${color.blue(`<${config.build.outDir}>/`)}${color.green(path)}`);
         const inputFiles = Object.values(inputMap).map(colorProcess);
         console.log(`[${pluginName}]: Generated virtual files: \n${inputFiles.join('\n')}`);
       }
     },
     /**
-     * Intercept html requests.
+     * Intercept virtual html requests.
      */
     resolveId(id, importer, options) {
       if (options.isEntry && virtualPageMap[id]) {
@@ -160,7 +169,7 @@ export function createMpaPlugin<
           const file = path.relative(config.root, filename);
 
           verbose && console.log(
-            `[${pluginName}]: ${color.blue(type)} - ${color.blue(file)}`,
+            `[${pluginName}]: ${color.green(`file ${type}`)} - ${color.dim(file)}`,
           );
 
           handler({
@@ -172,6 +181,20 @@ export function createMpaPlugin<
         });
       }
 
+      // Fully reload when template files change.
+      watcher.on('change', file => {
+        if (
+          file.endsWith('.html') &&
+          tplSet.has(path.relative(config.root, file))
+        ) {
+          server.ws.send({
+            type: 'full-reload',
+            path: '*',
+          });
+        }
+      });
+
+      // History fallback
       middlewares.use(
         // @ts-ignore
         history({
@@ -192,6 +215,7 @@ export function createMpaPlugin<
         }),
       );
 
+      // Handle html file redirected by history fallback.
       middlewares.use(async (req, res, next) => {
         const accept = req.headers.accept;
         const url = req.url!;
@@ -224,7 +248,6 @@ export function createMpaPlugin<
          * The following 2 lines fixed #12.
          * When using cypress for e2e testing, we should manually set response header and status code.
          * Otherwise, it causes cypress testing process of cross-entry-page jumping hanging, which results in a timeout error.
-         * @see https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/12
          */
         res.setHeader('Content-Type', 'text/html');
         res.statusCode = 200;
@@ -241,7 +264,7 @@ export function createMpaPlugin<
         res.end(
           await transformIndexHtml(
             url,
-            // No transform applied, keep code as-is,,
+            // No transform applied, keep code as-is
             transform(loadResult, fileName) ?? loadResult,
             req.originalUrl,
           ),
