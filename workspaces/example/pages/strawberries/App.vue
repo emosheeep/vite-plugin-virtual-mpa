@@ -7,6 +7,3 @@
   <a target="_self" href="/home">home</a>
 </template>
 
-<script setup lang="ts">
-const a = ''
-</script>
