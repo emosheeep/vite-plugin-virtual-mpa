@@ -1,13 +1,15 @@
 # 1.6.0
 
-fix: Warnings appear when `build.sourcemap` enabled. Closed [#19](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/19).
-fix: Page doesn't reload when template file change.
+- fix: Warnings appear when `build.sourcemap` enabled. Closed [#19](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/19).
+- fix: Page doesn't reload when template file change.
+feat: Integrate `html-minifier-terser`. Merged [#21](https://github.com/emosheeep/vite-plugin-virtual-mpa/pull/21).
+- feat: Integrate `html-minifier-terser`. Merged [#21](https://github.com/emosheeep/vite-plugin-virtual-mpa/pull/21).
 
 # 1.5.0
-feat: Allow vite handling unmatched paths. Closed [#15](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/15).
+- feat: Allow vite handling unmatched paths. Closed [#15](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/15).
 
 # 1.4.1
-fix: Cypress testing process of cross-entry-page jumping hanging, which causing a timeout error. Closed [#12](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/12).
+- fix: Cypress testing process of cross-entry-page jumping hanging, which causing a timeout error. Closed [#12](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/12).
 
 # 1.4.0
 

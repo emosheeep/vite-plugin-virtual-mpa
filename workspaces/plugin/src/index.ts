@@ -1,5 +1,5 @@
-import type { AllowedEvent, MpaOptions } from './api-types';
 import type { Plugin } from 'vite';
+import type { AllowedEvent, MpaOptions } from './api-types';
 import { createMpaPlugin as mpaPlugin } from './plugin';
 import { htmlMinifyPlugin } from './html-minify';
 
@@ -16,8 +16,10 @@ export function createMpaPlugin<
   config: MpaOptions<PN, PFN, PT, Event, TPL>,
 ): Plugin[] {
   const { htmlMinify } = config;
-  if (!htmlMinify) {
-    return [mpaPlugin(config)];
-  }
-  return [mpaPlugin(config), htmlMinifyPlugin(htmlMinify === true ? {} : htmlMinify)];
+  return !htmlMinify
+    ? [mpaPlugin(config)]
+    : [
+      mpaPlugin(config),
+      htmlMinifyPlugin(htmlMinify === true ? {} : htmlMinify),
+    ];
 }

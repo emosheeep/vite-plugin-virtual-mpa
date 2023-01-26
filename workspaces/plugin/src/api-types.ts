@@ -1,5 +1,5 @@
-import { FilterPattern, ViteDevServer } from 'vite';
-import { Rewrite } from 'connect-history-api-fallback';
+import type { FilterPattern, ViteDevServer } from 'vite';
+import type { Rewrite } from 'connect-history-api-fallback';
 import type { Options } from 'html-minifier-terser';
 
 export type AllowedEvent = 'add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir';
@@ -113,8 +113,8 @@ export interface MpaOptions<
    */
   pages: Page<PageName, PageFilename, PageTpl>[]
   /**
-   * HTML is not minimized by default.
-   * In most cases, pass `true` to use this feature, or use a custom `html-minifier-terser` options.
+   * Whether to minify html file. Powered by [html-minify-terser](https://github.com/terser/html-minifier-terser).
+   * @default false
    */
   htmlMinify?: Options | boolean
 }

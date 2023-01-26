@@ -177,7 +177,13 @@ interface MpaOptions {
      * Data to inject with ejs.
      */
     data?: Record<string, any>,
-  }>
+  }>,
+  /**
+   * Whether to minify html file. Powered by html-minify-terser.
+   * @default false
+   * @see https://github.com/terser/html-minifier-terser
+   */
+  htmlMinify?: Options | boolean,
 }
 ```
 ## Examples
@@ -196,6 +202,7 @@ export default defineConfig({
   base,
   plugins: [
     createMpaPlugin({
+      htmlMinify: false,
       pages: [
         {
           name: "apple",

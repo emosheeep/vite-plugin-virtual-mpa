@@ -170,7 +170,13 @@ interface MpaOptions {
      * 注入到模板文件的数据
      */
     data?: Record<string, any>,
-  }>
+  }>,
+  /**
+   * 是否使用 html-minify-terser 压缩 html 文件
+   * @default false
+   * @see https://github.com/terser/html-minifier-terser
+   */
+  htmlMinify?: Options | boolean,
 }
 ```
 ## Examples
@@ -189,6 +195,7 @@ export default defineConfig({
   base,
   plugins: [
     createMpaPlugin({
+      htmlMinify: false,
       pages: [
         {
           name: "apple",
