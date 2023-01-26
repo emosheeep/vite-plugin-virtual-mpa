@@ -59,6 +59,10 @@ export default defineConfig({
        */
       pages,
       /**
+       * Use html minimization feature at build time.
+       */
+      htmlMinify: true,
+      /**
        * Customize the history fallback rewrite rules.
        * If you config your pages as above, this rewrite rules will be automatically generated.
        * Otherwise you should manually write it, which will overwrite the default.

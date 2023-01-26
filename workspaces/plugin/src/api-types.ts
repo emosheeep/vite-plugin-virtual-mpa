@@ -1,5 +1,6 @@
 import { FilterPattern, ViteDevServer } from 'vite';
 import { Rewrite } from 'connect-history-api-fallback';
+import type { Options } from 'html-minifier-terser';
 
 export type AllowedEvent = 'add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir';
 
@@ -111,4 +112,9 @@ export interface MpaOptions<
    * Your MPA core configurations, you can write directly or use `createPages` function independently outside and then pass it to this field.
    */
   pages: Page<PageName, PageFilename, PageTpl>[]
+  /**
+   * HTML is not minimized by default.
+   * In most cases, pass `true` to use this feature, or use a custom `html-minifier-terser` options.
+   */
+  htmlMinify?: Options | boolean
 }
