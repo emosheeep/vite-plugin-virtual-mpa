@@ -10,23 +10,31 @@
 </head>
 
 <body>
-  <div id="root"></div>
+  <fieldset>
+    <legend>App Container</legend>
+    <div id="root"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>ENV Injection</legend>
+    <p>
+      ENV variables that start with 'VITE_' will be auto injected into the provided template.
+      <a href="https://vitejs.dev/config/shared-options.html#envprefix" target="_blank">More</a>
+    </p>
+
+    <ul>
+      <li>
+        VITE_TEST: <%= VITE_TEST %>
+      </li>
+      <li>
+        VITE_APP_KEY: <%= VITE_APP_KEY %>
+      </li>
+    </ul>
+  </fieldset>
+
   <p>
     <a href="/">Back to root</a>
   </p>
-  <p>
-    ENV variables that start with 'VITE_' will be auto injected into the provided template.
-    <a href="https://vitejs.dev/config/shared-options.html#envprefix" target="_blank">More</a>
-  </p>
-
-  <ul>
-    <li>
-      VITE_TEST: <%= VITE_TEST %>
-    </li>
-    <li>
-      VITE_APP_KEY: <%= VITE_APP_KEY %>
-    </li>
-  </ul>
 </body>
 
 </html>
