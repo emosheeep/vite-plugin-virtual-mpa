@@ -98,10 +98,15 @@ export interface MpaOptions<
    */
   template?: TplStr<DefTpl>
   /**
-   * Configure your rewrite rules, only proceed fallback html requests.
-   * see: https://github.com/bripkens/connect-history-api-fallback
+   * Configure your dev server's rewrite rules, only proceed fallback html requests.
+   * @see https://github.com/bripkens/connect-history-api-fallback
    */
   rewrites?: Rewrite[]
+  /**
+   * Configure your preview server's rewrite rules.
+   * @see https://github.com/bripkens/connect-history-api-fallback
+   */
+  previewRewrites?: Rewrite[]
   /**
    * Sometimes you might want to reload `pages` config or restart ViteDevServer when
    * there are some files added, removed, changed and so on. You can set `watchOptions` to
