@@ -2,10 +2,10 @@ import ejs from 'ejs';
 import color from 'picocolors';
 import fs from 'fs';
 import path from 'path';
-import history from 'connect-history-api-fallback';
+import history, { Rewrite } from 'connect-history-api-fallback';
 import { name as pkgName } from '../package.json';
 import type { MpaOptions, AllowedEvent, Page, WatchOptions } from './api-types';
-import { type ResolvedConfig, type Plugin, normalizePath, createFilter } from 'vite';
+import { type ResolvedConfig, type Plugin, normalizePath, createFilter, ViteDevServer } from 'vite';
 
 const bodyInject = /<\/body>/;
 const pluginName = color.cyan(pkgName);
@@ -28,6 +28,7 @@ export function createMpaPlugin<
     verbose = true,
     pages,
     rewrites,
+    previewRewrites,
     watchOptions,
   } = config;
   let resolvedConfig: ResolvedConfig;
@@ -64,6 +65,43 @@ export function createMpaPlugin<
     inputMap = tempInputMap;
     virtualPageMap = tempVirtualPageMap;
     tplSet = tempTplSet;
+  }
+
+  function useHistoryFallbackMiddleware(middlewares: ViteDevServer['middlewares'], rewrites: Rewrite[] = []) {
+    middlewares.use(
+      // @ts-ignore
+      history({
+        htmlAcceptHeaders: ['text/html', 'application/xhtml+xml'],
+        rewrites: rewrites.concat([
+          {
+            from: new RegExp(normalizePath(`/${resolvedConfig.base}/(${Object.keys(inputMap).join('|')})`)),
+            to: ctx => {
+              return normalizePath(`/${resolvedConfig.base}/${inputMap[ctx.match[1]]}`);
+            },
+          },
+          {
+            from: /.*/,
+            to: ctx => {
+              const { parsedUrl: { pathname } } = ctx;
+              return normalizePath(pathname?.endsWith('.html') ? pathname : `${pathname}/index.html`);
+            },
+          },
+        ]),
+      }),
+    );
+
+    // print rewriting log if verbose is true
+    if (verbose) {
+      middlewares.use((req, res, next) => {
+        const { url, originalUrl } = req;
+        if (originalUrl !== url) {
+          console.log(
+            `[${pluginName}]: Rewriting ${color.blue(originalUrl)} to ${color.blue(url)}`,
+          );
+        }
+        next();
+      });
+    }
   }
 
   /**
@@ -195,25 +233,7 @@ export function createMpaPlugin<
       });
 
       // History fallback
-      middlewares.use(
-        // @ts-ignore
-        history({
-          htmlAcceptHeaders: ['text/html', 'application/xhtml+xml'],
-          rewrites: (rewrites || []).concat([
-            {
-              from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).join('|')})`)),
-              to: ctx => normalizePath(`/${inputMap[ctx.match[1]]}`),
-            },
-            {
-              from: /.*/,
-              to: ctx => {
-                const { parsedUrl: { pathname } } = ctx;
-                return normalizePath(pathname?.endsWith('.html') ? pathname : `${pathname}/index.html`);
-              },
-            },
-          ]),
-        }),
-      );
+      useHistoryFallbackMiddleware(middlewares, rewrites);
 
       // Handle html file redirected by history fallback.
       middlewares.use(async (req, res, next) => {
@@ -229,16 +249,8 @@ export function createMpaPlugin<
           return next();
         }
 
-        // Uniform the request url, allows visiting files directly.
-        const rewritten = url.startsWith(base) ? url : normalizePath(`/${base}/${url}`);
-        const fileName = rewritten.replace(base, ''); // filename in page configuration can't start with '/', because the key of inputMap is relative path.
-
-        // print rewriting log if verbose is true
-        if (verbose && req.originalUrl !== url) {
-          console.log(
-            `[${pluginName}]: Rewriting ${color.blue(req.originalUrl)} to ${color.blue(rewritten)}`,
-          );
-        }
+        // filename in page configuration can't start with '/', because the key of inputMap is relative path.
+        const fileName = url.replace(base, '');
 
         if (!virtualPageMap[fileName]) {
           return next(); // This allows vite handling unmatched paths.
@@ -270,6 +282,10 @@ export function createMpaPlugin<
           ),
         );
       });
+    },
+    configurePreviewServer(server) {
+      // History Fallback
+      useHistoryFallbackMiddleware(server.middlewares, previewRewrites);
     },
   };
 }
