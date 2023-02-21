@@ -21,7 +21,7 @@
 - 💡 EJS 模板渲染
 - 💡 完备的 TypeScript 类型提示支持，是一款小而美的插件
 - 🛠️ 自定义模板HTML文件的输出路径, 使用一份模板生成多份文件
-- 🛠️ MPA 多页面应用支持，提供 History Fallback API.
+- 🛠️ 支持 MPA 多页面应用，为开发和预览服务器提供 History Fallback 支持.
 ## 使用方式
 
 ```sh
@@ -118,10 +118,15 @@ interface MpaOptions {
    */
   template?: `${string}.html`,
   /**
-   * 配置fallback rewrite rules，只会处理accept=text/html的文件请求
-   * 详见: https://github.com/bripkens/connect-history-api-fallback
+   * 为开发服务器配置 fallback rewrite rules，只会处理 accept=text/html 的文件请求。
+   * @see https://github.com/bripkens/connect-history-api-fallback
    */
   rewrites?: Rewrite[],
+  /**
+   * 为预览服务器配置重定向规则，配置方式同 rewrites。
+   * @see https://github.com/bripkens/connect-history-api-fallback
+   */
+  previewRewrites?: Rewrite[],
   /**
    * 当项目目录下有一些文件触发相应的事件如添加、删除、修改时，你可能想要重新加载 `pages` 配置 或 重启 ViteDevServer。
    * 你可以通过设置 `watchOptions` 来实现这一目的。
@@ -181,7 +186,7 @@ interface MpaOptions {
 ```
 ## Examples
 
-点击链接 [codesandbox](https://codesandbox.io/s/vite-plugin-virtual-mpa-0djylc) 快速体验
+点击链接 [codesandbox](https://codesandbox.io/p/sandbox/vite-plugin-virtual-mpa-0djylc) 快速体验
 
 ```ts
 // vite.config.ts
@@ -226,9 +231,9 @@ export default defineConfig({
         }
       ],
       /**
-       * 通过该选项rewrites来配置history fallback rewrite rules
+       * 通过该选项来配置 history fallback rewrite rules
        * 如果你像上面这样配置页面的话，那下面的这份配置将会自动生成。
-       * 否则你需要自己编写重定向规则，自定义规则将覆盖默认规则。
+       * 否则你需要自己编写重定向规则。
        */
       rewrites: [
         {
@@ -236,6 +241,13 @@ export default defineConfig({
           to: (ctx) => normalizePath(`/fruits/${ctx.match[1]}.html`),
         }
       ],
+      /**
+       * 配置预览服务器的重定向规则，配置方式同 rewrites
+       */
+      previewRewrites: [
+        // 如果产物目录没有 index.html，你需要手动配置规则，以便服务器能正确找到入口文件。
+        { from: /.*/, to: '/home.html' },
+      ]
     }),
   ],
 })
@@ -243,11 +255,11 @@ export default defineConfig({
 
 ## 默认重定向规则
 
-正如上面提到的👆🏻，如果你的配置遵循约定，插件将会自动生成一份重定向规则，如下：
+正如上面提到的👆🏻，如果你的配置遵循约定，插件将会自动生成一份重定向规则，这份配置会同时应用到开发和预览服务器，如下：
 ```ts
 {
   from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).join('|')})`)),
-  to: ctx => normalizePath(`/${inputMap[ctx.match[1]]}`),
+  to: ctx => normalizePath(`/${base}/${inputMap[ctx.match[1]]}`),
 }
 ```
 

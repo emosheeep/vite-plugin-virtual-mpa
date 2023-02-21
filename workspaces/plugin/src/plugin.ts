@@ -80,6 +80,7 @@ export function createMpaPlugin<
             },
           },
           {
+            /** Vite's default behavior */
             from: /.*/,
             to: ctx => {
               const { parsedUrl: { pathname } } = ctx;

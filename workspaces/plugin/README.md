@@ -21,7 +21,7 @@ English | [中文](./README.zh_CN.md)
 - 💡 EJS Template Capability
 - 💡 Fully Typed APIs and Prompts, Tiny and Pretty.
 - 🛠️ Customize the path of generated files, generate multiple files using only one template.
-- 🛠️ MPA support & History Fallback API.
+- 🛠️ MPA support and History Fallback API for both dev and preview server.
 
 ## Usage
 
@@ -122,9 +122,14 @@ interface MpaOptions {
   template?: `${string}.html`,
   /**
    * Configure your rewrite rules, only proceed html requests.
-   * further: https://github.com/bripkens/connect-history-api-fallback
+   * @see https://github.com/bripkens/connect-history-api-fallback
    */
   rewrites?: Rewrite[],
+  /**
+   * Configure your preview server's rewrite rules.
+   * @see https://github.com/bripkens/connect-history-api-fallback
+   */
+  previewRewrites?: Rewrite[],
   /**
    * Sometimes you might want to reload `pages` config or restart ViteDevServer when
    * there are some files added, removed, changed and so on. You can set `watchOptions` to
@@ -188,7 +193,7 @@ interface MpaOptions {
 ```
 ## Examples
 
-Click here [codesandbox](https://codesandbox.io/s/vite-plugin-virtual-mpa-0djylc) for a quick preview!
+Click here [codesandbox](https://codesandbox.io/p/sandbox/vite-plugin-virtual-mpa-0djylc) for a quick preview!
 
 ```ts
 // vite.config.ts
@@ -243,6 +248,14 @@ export default defineConfig({
           to: (ctx) => normalizePath(`/fruits/${ctx.match[1]}.html`),
         }
       ],
+      /**
+       * Configure your preview server's rewrite rules.
+       * This option is almost the same with `rewrites`.
+       */
+      previewRewrites: [
+        // If there's no index.html, you need to manually set rules for history fallback like:
+        { from: /.*/, to: '/home.html' },
+      ]
     }),
   ],
 })
@@ -250,12 +263,12 @@ export default defineConfig({
 
 ## Default Rewrite Rules
 
-As the examples above says 👆🏻, if you follow the conventions of configurations, this plugin will generate a default rule which looks like:
+As the examples above says 👆🏻, if you follow the conventions, this plugin will generate a default rule which will be applied to both dev and preview server, it looks like:
 
 ```ts
 {
   from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).join('|')})`)),
-  to: ctx => normalizePath(`/${inputMap[ctx.match[1]]}`),
+  to: ctx => normalizePath(`/${base}/${inputMap[ctx.match[1]]}`),
 }
 ```
 
