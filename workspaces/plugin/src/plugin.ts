@@ -143,12 +143,12 @@ export function createMpaPlugin<
 
   return {
     name: pluginName,
-    config() {
+    config({ clearScreen }) {
       configInit(pages); // Init
 
       return {
         appType: 'mpa',
-        clearScreen: false,
+        clearScreen: clearScreen ?? false,
         optimizeDeps: {
           entries: pages
             .map(v => v.entry)
