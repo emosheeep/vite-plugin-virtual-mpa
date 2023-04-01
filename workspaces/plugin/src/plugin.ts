@@ -79,14 +79,6 @@ export function createMpaPlugin<
               return normalizePath(`/${resolvedConfig.base}/${inputMap[ctx.match[1]]}`);
             },
           },
-          {
-            /** Vite's default behavior */
-            from: /.*/,
-            to: ctx => {
-              const { parsedUrl: { pathname } } = ctx;
-              return normalizePath(pathname?.endsWith('.html') ? pathname : `${pathname}/index.html`);
-            },
-          },
         ]),
       }),
     );
