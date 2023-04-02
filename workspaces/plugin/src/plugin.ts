@@ -154,14 +154,6 @@ export function createMpaPlugin<
       }
     },
     /**
-     * Intercept virtual html requests.
-     */
-    resolveId(id, importer, options) {
-      if (options.isEntry && virtualPageMap[id]) {
-        return id;
-      }
-    },
-    /**
      * Get html according to page configurations.
      */
     load(id) {
