@@ -103,6 +103,8 @@ export function createMpaPlugin<
   function getTemplateContent(filename: string) {
     const page = virtualPageMap[filename];
 
+    console.log(page);
+
     try {
       return fs.readFileSync(page.template || template, 'utf-8');
     } catch (e) {
