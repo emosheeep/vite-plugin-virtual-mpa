@@ -238,14 +238,6 @@ export function createMpaPlugin<
           return next(); // This allows vite handling unmatched paths.
         }
 
-        /**
-         * The following 2 lines fixed #12.
-         * When using cypress for e2e testing, we should manually set response header and status code.
-         * Otherwise, it causes cypress testing process of cross-entry-page jumping hanging, which results in a timeout error.
-         */
-        res.setHeader('Content-Type', 'text/html');
-        res.statusCode = 200;
-
         // load file
         let loadResult = await pluginContainer.load(fileName);
         if (!loadResult) {
@@ -255,6 +247,13 @@ export function createMpaPlugin<
           ? loadResult
           : loadResult.code;
 
+        /**
+         * The following 2 lines fixed #12.
+         * When using cypress for e2e testing, we should manually set response header and status code.
+         * Otherwise, it causes cypress testing process of cross-entry-page jumping hanging, which results in a timeout error.
+         */
+        res.setHeader('Content-Type', 'text/html');
+        res.statusCode = 200;
         res.end(
           await transformIndexHtml(
             url,
