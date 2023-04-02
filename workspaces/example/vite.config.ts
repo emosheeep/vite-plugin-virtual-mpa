@@ -12,7 +12,7 @@ const pages = createPages([
      * filename is optional, default is `${name}.html`, which is the relative path of `build.outDir`.
      */
     filename: 'fruits/apple.html', // output into sites/fruits/apple.html at build time.
-    entry: '/pages/apple/apple.js',
+    entry: '/pages/apple/index.js',
     data: {
       title: 'This is Apple page',
     },
@@ -20,7 +20,7 @@ const pages = createPages([
   {
     name: 'banana',
     filename: 'fruits/banana.html',
-    entry: '/pages/banana/banana.js',
+    entry: '/pages/banana/index.js',
     data: {
       title: 'This is Banana page',
     },
@@ -28,13 +28,14 @@ const pages = createPages([
   {
     name: 'strawberries',
     filename: 'fruits/strawberries.html',
-    entry: '/pages/strawberries/strawberries.js',
+    entry: '/pages/strawberries/index.js',
     data: {
       title: 'This is Strawberries page',
     },
   },
   {
     name: 'home',
+    filename: 'fruits/home.html',
     entry: '/pages/home/index.js',
     data: {
       title: 'This is Home page',
@@ -62,6 +63,14 @@ export default defineConfig({
        */
       pages,
       /**
+       * The following `scanOptions` configs can replace the `pages` above, but except data injection.
+       */
+      scanOptions: {
+        scanDirs: 'pages',
+        entryFile: 'index.js',
+        filename: name => `fruits/${name}.html`,
+      },
+      /**
        * Use html minimization feature at build time.
        */
       htmlMinify: true,
@@ -73,7 +82,7 @@ export default defineConfig({
       rewrites: [
         {
           from: new RegExp(
-            normalizePath(`/${base}/(apple|banana|strawberries)`),
+            normalizePath(`/${base}/(apple|banana|strawberries|home)`),
           ),
           to: (ctx) => normalizePath(`/${base}/fruits/${ctx.match[1]}.html`),
         },

@@ -131,6 +131,25 @@ interface MpaOptions {
    */
   previewRewrites?: Rewrite[],
   /**
+   * Use to scan directories that have similar structure to generate pages.
+   * Detected pages will be appended to `pages` option, page with name existed will be ignored.
+   */
+  scanOptions?: {
+    /**
+     * Directory path to scan, subdirectory's name will be used as unique page name.
+     */
+    scanDirs: string | string[];
+    /**
+     * The entry file path relative to scanned dir.
+     */
+    entryFile?: string;
+    /**
+     * Customize the virtual file name(output filename).
+     * @param name Subdirectory name
+     */
+    filename?: (name: string) => string;
+  };
+  /**
    * Sometimes you might want to reload `pages` config or restart ViteDevServer when
    * there are some files added, removed, changed and so on. You can set `watchOptions` to
    * customize your own logic.
@@ -215,7 +234,7 @@ export default defineConfig({
            * filename is optional, default is `${name}.html`, which is the relative path of `build.outDir`.
            */
           filename: "fruits/apple.html", // output into sites/fruits/apple.html at build time.
-          entry: "/src/fruits/apple/apple.js",
+          entry: "/src/fruits/apple/index.js",
           data: {
             title: "This is Apple page"
           }
@@ -223,7 +242,7 @@ export default defineConfig({
         {
           name: "banana",
           filename: "fruits/banana.html",
-          entry: "/src/fruits/banana/banana.js",
+          entry: "/src/fruits/banana/index.js",
           data: {
             title: "This is Banana page"
           }
@@ -231,12 +250,20 @@ export default defineConfig({
         {
           name: "strawberries",
           filename: "fruits/strawberries.html",
-          entry: "/src/fruits/strawberries/strawberries.js",
+          entry: "/src/fruits/strawberries/index.js",
           data: {
             title: "This is Strawberries page"
           }
         }
       ],
+      /**
+       * The following `scanOptions` configs can replace the `pages` above, but except data injection.
+       */
+      scanOptions: {
+        scanDirs: 'src/fruits',
+        entryFile: 'index.js',
+        filename: name => `fruits/${name}.html`
+      }
       /**
        * Customize the history fallback rewrite rules.
        * If you config your pages as above, this rewrite rules will be automatically generated.

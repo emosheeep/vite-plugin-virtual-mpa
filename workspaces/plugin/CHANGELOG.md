@@ -1,3 +1,9 @@
+# 1.8.0
+
+feat: Add `scanOptions` to generate pages with a similar directory structure.
+fix: Can't access assets by url & Prevent ejs syntax error.
+chore: Remove redundant rewrite rules ensure a correct plugin hook order.
+
 # 1.7.0
 
 - feat: Add preview server's history fallback support. Merged [#26](https://github.com/emosheeep/vite-plugin-virtual-mpa/pull/26)

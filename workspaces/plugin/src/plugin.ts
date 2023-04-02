@@ -4,15 +4,11 @@ import fs from 'fs';
 import path from 'path';
 import history, { Rewrite } from 'connect-history-api-fallback';
 import { name as pkgName } from '../package.json';
-import type { MpaOptions, AllowedEvent, Page, WatchOptions } from './api-types';
+import type { MpaOptions, AllowedEvent, Page, WatchOptions, ScanOptions } from './api-types';
 import { type ResolvedConfig, type Plugin, normalizePath, createFilter, ViteDevServer } from 'vite';
 
 const bodyInject = /<\/body>/;
 const pluginName = color.cyan(pkgName);
-
-function throwError(message) {
-  throw new Error(`[${pluginName}]: ${color.red(message)}`);
-}
 
 export function createMpaPlugin<
   PN extends string,
@@ -26,10 +22,11 @@ export function createMpaPlugin<
   const {
     template = 'index.html',
     verbose = true,
-    pages,
+    pages = [],
     rewrites,
     previewRewrites,
     watchOptions,
+    scanOptions,
   } = config;
   let resolvedConfig: ResolvedConfig;
 
@@ -45,7 +42,8 @@ export function createMpaPlugin<
     const tempVirtualPageMap: typeof virtualPageMap = {};
     const tempTplSet: typeof tplSet = new Set([template]);
 
-    for (const page of pages) {
+    // put detected pages after manual pages
+    for (const page of [...pages, ...scanPages(scanOptions)]) {
       const entryPath = page.filename || `${page.name}.html`;
       if (entryPath.startsWith('/')) throwError(`Make sure the path relative, received '${entryPath}'`);
       if (page.name.includes('/')) throwError(`Page name shouldn't include '/', received '${page.name}'`);
@@ -54,6 +52,8 @@ export function createMpaPlugin<
           `Entry must be an absolute path relative to the project root, received '${page.entry}'`,
         );
       }
+
+      if (tempInputMap[page.name]) continue; // ignore the existed pages
 
       tempInputMap[page.name] = entryPath;
       tempVirtualPageMap[entryPath] = page;
@@ -128,7 +128,7 @@ export function createMpaPlugin<
   return {
     name: pluginName,
     config() {
-      configInit(config.pages); // Init
+      configInit(pages); // Init
 
       return {
         appType: 'mpa',
@@ -145,6 +145,7 @@ export function createMpaPlugin<
         },
       };
     },
+
     configResolved(config) {
       resolvedConfig = config;
       if (verbose) {
@@ -274,6 +275,37 @@ export function createMpaPlugin<
       useHistoryFallbackMiddleware(server.middlewares, previewRewrites);
     },
   };
+}
+
+function throwError(message) {
+  throw new Error(`[${pluginName}]: ${color.red(message)}`);
+}
+
+/**
+ * Generate pages configurations using scanOptions.
+ */
+function scanPages(scanOptions?: ScanOptions) {
+  const { filename, entryFile, scanDirs } = scanOptions || {} as ScanOptions;
+  const pages: Page[] = [];
+
+  for (const entryDir of [scanDirs].flat().filter(Boolean)) {
+    for (const name of fs.readdirSync(entryDir)) {
+      const dir = path.join(entryDir, name); // dir path
+      if (!fs.statSync(dir).isDirectory()) continue;
+
+      pages.push({
+        name,
+        filename: typeof filename === 'function'
+          ? filename(name) as Page['filename']
+          : undefined,
+        entry: entryFile
+          ? path.join('/', dir, entryFile) as Page['entry']
+          : undefined,
+      });
+    }
+  }
+
+  return pages;
 }
 
 // // This is for type declaration testing.

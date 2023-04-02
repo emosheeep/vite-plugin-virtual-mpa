@@ -80,6 +80,22 @@ export interface WatchOptions<Event extends AllowedEvent = AllowedEvent>{
   handler: WatchHandler<Event>
 }
 
+export interface ScanOptions {
+  /**
+   * Directory path to scan, subdirectory's name will be used as unique page name.
+   */
+  scanDirs: string | string[];
+  /**
+   * The entry file path relative to scanned dir.
+   */
+  entryFile?: string;
+  /**
+   * Customize the virtual file name(output filename).
+   * @param name Subdirectory name
+   */
+  filename?: (name: string) => string;
+}
+
 export interface MpaOptions<
   PageName extends string,
   PageFilename extends string,
@@ -91,35 +107,40 @@ export interface MpaOptions<
    * Whether to print log.
    * @default true
    */
-  verbose?: boolean
+  verbose?: boolean;
   /**
    * Default template file.
    * @default index.html
    */
-  template?: TplStr<DefTpl>
+  template?: TplStr<DefTpl>;
   /**
    * Configure your dev server's rewrite rules, only proceed fallback html requests.
    * @see https://github.com/bripkens/connect-history-api-fallback
    */
-  rewrites?: Rewrite[]
+  rewrites?: Rewrite[];
   /**
    * Configure your preview server's rewrite rules.
    * @see https://github.com/bripkens/connect-history-api-fallback
    */
-  previewRewrites?: Rewrite[]
+  previewRewrites?: Rewrite[];
   /**
    * Sometimes you might want to reload `pages` config or restart ViteDevServer when
    * there are some files added, removed, changed and so on. You can set `watchOptions` to
    * customize your own logic.
    */
-  watchOptions?: WatchHandler<Event> | WatchOptions<Event>,
+  watchOptions?: WatchHandler<Event> | WatchOptions<Event>;
   /**
    * Your MPA core configurations, you can write directly or use `createPages` function independently outside and then pass it to this field.
    */
-  pages: Page<PageName, PageFilename, PageTpl>[]
+  pages?: Page<PageName, PageFilename, PageTpl>[];
+  /**
+   * Use to scan directories that have similar structure to generate pages.
+   * Detected pages will be appended to `pages` option, page with name existed will be ignored.
+   */
+  scanOptions?: ScanOptions;
   /**
    * Whether to minify html file. Powered by [html-minify-terser](https://github.com/terser/html-minifier-terser).
    * @default false
    */
-  htmlMinify?: Options | boolean
+  htmlMinify?: Options | boolean;
 }

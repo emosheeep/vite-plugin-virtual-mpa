@@ -128,6 +128,25 @@ interface MpaOptions {
    */
   previewRewrites?: Rewrite[],
   /**
+   * 用于扫描相似的目录结构，自动生成 pages 配置。
+   * 扫描到的配置会追加到 `pages` 中，具有相同 name 的 page 将被忽略
+   */
+  scanOptions?: {
+    /**
+     * 要扫描的目录，子目录名称将作为唯一的 page name。
+     */
+    scanDirs: string | string[];
+    /**
+     * 相对于扫描目录的入口文件路径
+     */
+    entryFile?: string;
+    /**
+     * 自定义虚拟文件的名称（输入文件名）
+     * @param name 子目录名称
+     */
+    filename?: (name: string) => string;
+  };
+  /**
    * 当项目目录下有一些文件触发相应的事件如添加、删除、修改时，你可能想要重新加载 `pages` 配置 或 重启 ViteDevServer。
    * 你可以通过设置 `watchOptions` 来实现这一目的。
    */
@@ -208,7 +227,7 @@ export default defineConfig({
            * 文件名是可选的，默认将会是`${name}.html`，这个路径是相对于`build.outDir`
            */
           filename: "fruits/apple.html", // 将会在编译时输出到sites/fruits/apple.html
-          entry: "/src/fruits/apple/apple.js",
+          entry: "/src/fruits/apple/index.js",
           data: {
             title: "This is Apple page"
           }
@@ -216,7 +235,7 @@ export default defineConfig({
         {
           name: "banana",
           filename: "fruits/banana.html",
-          entry: "/src/fruits/banana/banana.js",
+          entry: "/src/fruits/banana/index.js",
           data: {
             title: "This is Banana page"
           }
@@ -224,12 +243,20 @@ export default defineConfig({
         {
           name: "strawberries",
           filename: "fruits/strawberries.html",
-          entry: "/src/fruits/strawberries/strawberries.js",
+          entry: "/src/fruits/strawberries/index.js",
           data: {
             title: "This is Strawberries page"
           }
         }
       ],
+      /**
+       * 以下示例的 scanOptions 配置可以替换上面的 pages 配置，除了 data 的注入。
+       */
+      scanOptions: {
+        scanDirs: 'src/fruits',
+        entryFile: 'index.js',
+        filename: name => `fruits/${name}.html`
+      }
       /**
        * 通过该选项来配置 history fallback rewrite rules
        * 如果你像上面这样配置页面的话，那下面的这份配置将会自动生成。
