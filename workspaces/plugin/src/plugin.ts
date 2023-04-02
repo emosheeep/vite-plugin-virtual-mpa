@@ -225,12 +225,13 @@ export function createMpaPlugin<
 
       // Handle html file redirected by history fallback.
       middlewares.use(async (req, res, next) => {
-        const url = req.url!;
+        const url = req.url;
         // filename in page configuration can't start with '/', because the key of inputMap is relative path.
-        const fileName = url.replace(base, '').replace(/[?#].*$/s, ''); // clean url
+        const fileName = url?.match(`${base}([^?]+)`)?.[1]; // clean url
 
         if (
           res.writableEnded ||
+          !fileName ||
           !fileName.endsWith('.html') || // HTML Fallback Middleware appends '.html' to URLs
           !virtualPageMap[fileName]
         ) {
