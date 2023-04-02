@@ -230,22 +230,15 @@ export function createMpaPlugin<
 
       // Handle html file redirected by history fallback.
       middlewares.use(async (req, res, next) => {
-        const accept = req.headers.accept;
         const url = req.url!;
+        // filename in page configuration can't start with '/', because the key of inputMap is relative path.
+        const fileName = url.replace(base, '').replace(/[?#].*$/s, ''); // clean url
 
-        // Ignore request that are not html.
         if (
           res.writableEnded ||
-          accept === '*/*' ||
-          !accept?.includes('text/html')
+          !fileName.endsWith('.html') || // HTML Fallback Middleware appends '.html' to URLs
+          !virtualPageMap[fileName]
         ) {
-          return next();
-        }
-
-        // filename in page configuration can't start with '/', because the key of inputMap is relative path.
-        const fileName = url.replace(base, '');
-
-        if (!virtualPageMap[fileName]) {
           return next(); // This allows vite handling unmatched paths.
         }
 

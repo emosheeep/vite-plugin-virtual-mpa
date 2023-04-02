@@ -1,4 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npx lint-staged --relative
+echo Running pre-commit hook...
+npx eslint . --ext .js,.ts,.mjs,.cjs
+npx tsc --noEmit
+echo No problems were found.

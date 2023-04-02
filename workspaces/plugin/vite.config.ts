@@ -1,17 +1,12 @@
 import { defineConfig } from 'vite';
-import { externals } from 'rollup-plugin-node-externals';
+import { externalizeDeps } from 'vite-plugin-externalize-deps';
 import viteChecker from 'vite-plugin-checker';
+import dtsPlugin from 'vite-plugin-dts';
 
 export default defineConfig({
   plugins: [
-    {
-      enforce: 'pre',
-      ...externals({
-        deps: true,
-        devDeps: true,
-        peerDeps: true,
-      }),
-    },
+    externalizeDeps(),
+    dtsPlugin({ skipDiagnostics: true }),
     viteChecker({
       typescript: true,
       eslint: {

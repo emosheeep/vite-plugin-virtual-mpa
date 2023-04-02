@@ -48,8 +48,9 @@ export default defineConfig({
   build: {
     sourcemap: true,
   },
-  server: { port: 5173 },
+  server: { port: 5173, open: true },
   preview: { port: 5173 },
+  optimizeDeps: { force: true },
   plugins: [
     vue(),
     vueJsx(),

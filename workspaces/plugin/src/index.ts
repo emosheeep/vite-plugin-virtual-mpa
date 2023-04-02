@@ -4,7 +4,7 @@ import { createMpaPlugin as mpaPlugin } from './plugin';
 import { htmlMinifyPlugin } from './html-minify';
 
 export * from './api-types';
-export * from './utils';
+export { createPages } from './utils';
 
 export function createMpaPlugin<
   PN extends string,
