@@ -98,25 +98,6 @@ export function createMpaPlugin<
   }
 
   /**
-   * Get html according to page configurations.
-   */
-  function getTemplateContent(filename: string) {
-    const page = virtualPageMap[filename];
-
-    console.log(page);
-
-    try {
-      return fs.readFileSync(page.template || template, 'utf-8');
-    } catch (e) {
-      if (verbose) {
-        console.log(
-          `[${pluginName}]: ${color.red(`Failed to load the template of the page '${page.name}'\n${e}`)}`,
-        );
-      }
-    }
-  }
-
-  /**
    * Template file transform.
    */
   function ejsRender(fileContent: string, id?: string) {
@@ -170,6 +151,14 @@ export function createMpaPlugin<
         console.log(`[${pluginName}]: Generated virtual files: \n${inputFiles.join('\n')}`);
       }
     },
+    /**
+     * Get html according to page configurations.
+     */
+    load(id) {
+      const page = virtualPageMap[id];
+      if (!page) return null;
+      return fs.readFileSync(page.template || template, 'utf-8');
+    },
     transformIndexHtml: {
       enforce: 'pre',
       transform(html) {
@@ -181,6 +170,7 @@ export function createMpaPlugin<
         config,
         watcher,
         middlewares,
+        pluginContainer,
         transformIndexHtml,
       } = server;
 
@@ -249,11 +239,13 @@ export function createMpaPlugin<
         }
 
         // load file
-        const loadResult = getTemplateContent(fileName);
+        let loadResult = await pluginContainer.load(fileName);
         if (!loadResult) {
-          // Hand it over to vite.
-          return next();
+          throw new Error(`Failed to load url ${fileName}`);
         }
+        loadResult = typeof loadResult === 'string'
+          ? loadResult
+          : loadResult.code;
 
         /**
          * The following 2 lines fixed #12.
