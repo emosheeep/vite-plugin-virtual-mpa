@@ -100,29 +100,27 @@ export function createMpaPlugin<
   /**
    * Template file transform.
    */
-  function transform(fileContent, id) {
-    const page = virtualPageMap[id];
-    /**
-     * Fixed #19.
-     * Always return `null` if there're no modifications applied.
-     * Otherwise it may cause building warnings when `build.sourcemap` enabled.
-     */
-    if (!page) return null;
+  function ejsRender(fileContent: string, id?: string) {
+    const page = id ? virtualPageMap[id] : null;
 
-    return ejs.render(
-      !page.entry
-        ? fileContent
-        : fileContent.replace(
-          bodyInject,
-          `<script type="module" src="${normalizePath(
-            `${page.entry}`,
-          )}"></script>\n</body>`,
-        ),
-      // Variables injection
-      { ...resolvedConfig.env, ...page.data },
-      // For error report
-      { filename: id, root: resolvedConfig.root },
-    );
+    try {
+      return ejs.render(
+        !page?.entry
+          ? fileContent
+          : fileContent.replace(
+            bodyInject,
+            `<script type="module" src="${normalizePath(
+              `${page.entry}`,
+            )}"></script>\n</body>`,
+          ),
+        // Variables injection
+        { ...resolvedConfig.env, ...page?.data },
+        // For error report
+        { filename: id, root: resolvedConfig.root, async: false },
+      );
+    } catch (e) {
+      return fileContent;
+    }
   }
 
   return {
@@ -161,7 +159,12 @@ export function createMpaPlugin<
       if (!page) return null;
       return fs.readFileSync(page.template || template, 'utf-8');
     },
-    transform,
+    transformIndexHtml: {
+      enforce: 'pre',
+      transform(html) {
+        return ejsRender(html);
+      },
+    },
     configureServer(server) {
       const {
         config,
@@ -254,8 +257,7 @@ export function createMpaPlugin<
         res.end(
           await transformIndexHtml(
             url,
-            // No transform applied, keep code as-is
-            transform(loadResult, fileName) ?? loadResult,
+            ejsRender(loadResult, fileName),
             req.originalUrl,
           ),
         );
