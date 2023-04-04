@@ -74,7 +74,7 @@ export function createMpaPlugin<
       // @ts-ignore
       history({
         // Override the index (default /index.html).
-        index: `${base}index.html`,
+        index: normalizePath(`/${base}/index.html`),
         htmlAcceptHeaders: ['text/html', 'application/xhtml+xml'],
         rewrites: rewrites.concat([
           {
