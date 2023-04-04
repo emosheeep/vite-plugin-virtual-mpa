@@ -83,6 +83,18 @@ export function createMpaPlugin<
               return normalizePath(`/${base}/${inputMap[ctx.match[1]]}`);
             },
           },
+          {
+            from: /\/$/,
+            to({ parsedUrl, request }: any) {
+              const rewritten = decodeURIComponent(parsedUrl.pathname) + 'index.html';
+
+              if (fs.existsSync(rewritten.replace(base, ''))) {
+                return rewritten;
+              }
+
+              return request.url;
+            },
+          },
         ]),
       }),
     );
