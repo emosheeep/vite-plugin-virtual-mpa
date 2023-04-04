@@ -68,15 +68,19 @@ export function createMpaPlugin<
   }
 
   function useHistoryFallbackMiddleware(middlewares: ViteDevServer['middlewares'], rewrites: Rewrite[] = []) {
+    const { base } = resolvedConfig;
+
     middlewares.use(
       // @ts-ignore
       history({
+        // Override the index (default /index.html).
+        index: `${base}index.html`,
         htmlAcceptHeaders: ['text/html', 'application/xhtml+xml'],
         rewrites: rewrites.concat([
           {
-            from: new RegExp(normalizePath(`/${resolvedConfig.base}/(${Object.keys(inputMap).join('|')})`)),
+            from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).join('|')})`)),
             to: ctx => {
-              return normalizePath(`/${resolvedConfig.base}/${inputMap[ctx.match[1]]}`);
+              return normalizePath(`/${base}/${inputMap[ctx.match[1]]}`);
             },
           },
         ]),
