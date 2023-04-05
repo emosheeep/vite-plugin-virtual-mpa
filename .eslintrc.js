@@ -1,18 +1,22 @@
 const { defineConfig } = require('eslint-define-config');
 
 module.exports = defineConfig({
+  parser: 'vue-eslint-parser',
+  parserOptions: {
+    parser: '@typescript-eslint/parser',
+    sourceType: 'module',
+    ecmaVersion: 'latest',
+  },
   env: {
     es2021: true,
     node: true,
   },
   extends: [
+    'plugin:vue/vue3-recommended',
     'standard',
+    '@vue/typescript/recommended',
     'plugin:@typescript-eslint/recommended',
   ],
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-  },
   rules: {
     semi: 'off',
     indent: 'off',
@@ -30,5 +34,6 @@ module.exports = defineConfig({
       named: 'never',
       asyncArrow: 'always',
     }],
+    'vue/max-attributes-per-line': 'off',
   },
 });

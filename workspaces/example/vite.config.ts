@@ -1,3 +1,4 @@
+import path from 'path';
 import { defineConfig, normalizePath } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
@@ -12,7 +13,7 @@ const pages = createPages([
      * filename is optional, default is `${name}.html`, which is the relative path of `build.outDir`.
      */
     filename: 'fruits/apple.html', // output into sites/fruits/apple.html at build time.
-    entry: '/pages/apple/index.js',
+    entry: '/src/pages/apple/index.js',
     data: {
       title: 'This is Apple page',
     },
@@ -20,7 +21,7 @@ const pages = createPages([
   {
     name: 'banana',
     filename: 'fruits/banana.html',
-    entry: '/pages/banana/index.js',
+    entry: '/src/pages/banana/index.js',
     data: {
       title: 'This is Banana page',
     },
@@ -28,7 +29,7 @@ const pages = createPages([
   {
     name: 'strawberries',
     filename: 'fruits/strawberries.html',
-    entry: '/pages/strawberries/index.js',
+    entry: '/src/pages/strawberries/index.js',
     data: {
       title: 'This is Strawberries page',
     },
@@ -36,7 +37,7 @@ const pages = createPages([
   {
     name: 'home',
     filename: 'fruits/home.html',
-    entry: '/pages/home/index.js',
+    entry: '/src/pages/home/index.js',
     data: {
       title: 'This is Home page',
     },
@@ -46,17 +47,11 @@ const pages = createPages([
 // https://vitejs.dev/config/
 export default defineConfig({
   base,
-  build: {
-    sourcemap: true,
-  },
-  server: { port: 5173, open: true },
-  preview: { port: 5173 },
-  optimizeDeps: { force: true },
   plugins: [
     vue(),
     vueJsx(),
     createMpaPlugin({
-      template: 'pages/template.html',
+      template: 'src/template.html',
       /**
        * You can write directly or use `createPages` function independently outside and then pass it to this field.
        * Both of the above can enjoy type hints.
@@ -66,7 +61,7 @@ export default defineConfig({
        * The following `scanOptions` configs can replace the `pages` above, but except data injection.
        */
       scanOptions: {
-        scanDirs: 'pages',
+        scanDirs: 'src/pages',
         entryFile: 'index.js',
         filename: name => `fruits/${name}.html`,
       },
@@ -116,4 +111,9 @@ export default defineConfig({
       },
     }),
   ],
+  build: { sourcemap: true },
+  server: { port: 5173, open: true },
+  preview: { port: 5173 },
+  optimizeDeps: { force: true },
+  resolve: { alias: { '@': path.resolve('src') } },
 });

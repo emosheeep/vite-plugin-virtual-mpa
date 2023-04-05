@@ -6,4 +6,3 @@
   <span>|</span>
   <a target="_self" href="/home">home</a>
 </template>
-
