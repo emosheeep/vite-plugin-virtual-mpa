@@ -85,6 +85,10 @@ export function createMpaPlugin<
           },
           {
             from: /\/$/,
+            /**
+             * Support /dir/ without explicit index.html
+             * @see https://github.com/vitejs/vite/blob/main/packages/vite/src/node/server/middlewares/htmlFallback.ts#L13
+             */
             to({ parsedUrl, request }: any) {
               const rewritten = decodeURIComponent(parsedUrl.pathname) + 'index.html';
 
@@ -143,12 +147,12 @@ export function createMpaPlugin<
 
   return {
     name: pluginName,
-    config({ clearScreen }) {
+    config(config) {
       configInit(pages); // Init
 
       return {
         appType: 'mpa',
-        clearScreen: clearScreen ?? false,
+        clearScreen: config.clearScreen ?? false,
         optimizeDeps: {
           entries: pages
             .map(v => v.entry)

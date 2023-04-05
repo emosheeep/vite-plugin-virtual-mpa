@@ -1,8 +1,14 @@
+# 1.8.1
+
+- fix: `ERR_TOO_MANY_REDIRECTS` when set `base` option and visit base. Closed [#33](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/33)
+- feat: Support `/dir/` without explicit `index.html` refer to the implementation of vite.
+- chore: Preserve the priority of `clearScreen` option provided by user.
+
 # 1.8.0
 
-feat: Add `scanOptions` to generate pages with a similar directory structure.
-fix: Can't access assets by url & Prevent ejs syntax error.
-chore: Remove redundant rewrite rules ensure a correct plugin hook order.
+- feat: Add `scanOptions` to generate pages with a similar directory structure. Closed [#29](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/29).
+- fix: Can't access assets by url & Prevent ejs syntax error. Closed [#30](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/30).
+- chore: Remove redundant rewrite rules ensure a correct plugin hook order.
 
 # 1.7.0
 
