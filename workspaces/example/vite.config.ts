@@ -74,14 +74,14 @@ export default defineConfig({
        * If you config your pages as above, this rewrite rules will be automatically generated.
        * Otherwise you should manually write it, which will overwrite the default.
        */
-      rewrites: [
-        {
-          from: new RegExp(
-            normalizePath(`/${base}/(apple|banana|strawberries|home)`),
-          ),
-          to: (ctx) => normalizePath(`/${base}/fruits/${ctx.match[1]}.html`),
-        },
-      ],
+      // rewrites: [
+      //   {
+      //     from: new RegExp(
+      //       normalizePath(`/${base}/(apple|banana|strawberries|home)`),
+      //     ),
+      //     to: (ctx) => normalizePath(`/${base}/fruits/${ctx.match[1]}.html`),
+      //   },
+      // ],
       /**
        * Customize the history fallback rewrite rules for `preview server`.
        * This option is almost the same with `rewrites`.

@@ -12,18 +12,82 @@
     <legend>
       <a href="/">Entrances</a>
     </legend>
+    <div>
+      Default Matching Rules: <code>/\/(apple|banana|strawberries|home)(?:\.html?)?(\?|#|$).*/</code>
+    </div>
     <ul>
       <li>
         <a href="/home">/home</a>
       </li>
       <li>
+        <a href="/home?">/home?</a>
+      </li>
+      <li>
+        <a href="/home?foo=foo">/home?foo=foo</a>
+      </li>
+      <li>
+        <a href="/home?foo=foo#hash">/home?foo=foo#hash</a>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        <a href="/home#">/home#</a>
+      </li>
+      <li>
+        <a href="/home#hash">/home#hash</a>
+      </li>
+      <li>
+        <a href="/home#hash?foo=foo">/home#hash?foo=foo</a>
+      </li>
+    </ul>
+    <ul>
+      <li>
         <a href="/home.html">/home.html</a>
       </li>
       <li>
-        <a href="/apple">/apple</a>
+        <a href="/home.html?">/home.html?</a>
       </li>
       <li>
-        <a href="/apple.html">/apple.html</a>
+        <a href="/home.html?foo=foo">/home.html?foo=foo</a>
+      </li>
+      <li>
+        <a href="/home.html?foo=foo#hash">/home.html?foo=foo#hash</a>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        <a href="/home.html#">/home.html#</a>
+      </li>
+      <li>
+        <a href="/home.html#hash">/home.html#hash</a>
+      </li>
+      <li>
+        <a href="/home.html#hash?foo=foo">/home.html#hash?foo=foo</a>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        <a href="/home.htm">/home.htm</a>
+      </li>
+      <li>
+        <a href="/home.htm?">/home.htm?</a>
+      </li>
+      <li>
+        <a href="/home.htm?foo=foo">/home.htm?foo=foo</a>
+      </li>
+      <li>
+        <a href="/home.htm?foo=foo#hash">/home.htm?foo=foo#hash</a>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        <a href="/home.htm#">/home.htm#</a>
+      </li>
+      <li>
+        <a href="/home.htm#hash">/home.htm#hash</a>
+      </li>
+      <li>
+        <a href="/home.htm#hash?foo=foo">/home.htm#hash?foo=foo</a>
       </li>
     </ul>
   </fieldset>
@@ -35,6 +99,9 @@
         <a href="/">/ -> /index.html</a>
       </li>
       <li>
+        <a href="/home/">/home/ -> 404</a>
+      </li>
+      <li>
         <a href="/infos">/infos -> /index.html</a>
       </li>
       <li>
@@ -42,6 +109,12 @@
       </li>
       <li>
         <a href="/infos/index.html">/infos/index.html -> Infos Index</a>
+      </li>
+      <li>
+        <a href="/infos/home">/infos/home -> /home ⚠️</a>
+      </li>
+      <li>
+        <a href="/infos/home/">/infos/home/ -> Infos Home</a>
       </li>
       <li>
         <a href="/infos/other">/infos/other -> /index.html</a>
