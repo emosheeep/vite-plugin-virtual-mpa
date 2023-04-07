@@ -76,10 +76,8 @@ export default defineConfig({
        */
       rewrites: [
         {
-          from: new RegExp(
-            normalizePath(`/${base}/(apple|banana|strawberries|home)`),
-          ),
-          to: (ctx) => normalizePath(`/${base}/fruits/${ctx.match[1]}.html`),
+          from: /\/demo/,
+          to: () => '/infos/index.html',
         },
       ],
       /**
@@ -88,7 +86,7 @@ export default defineConfig({
        */
       previewRewrites: [
         // If there's no index.html, you need to manually set rules for history fallback like:
-        { from: /.*/, to: '/home.html' },
+        { from: /\//, to: '/fruits/home.html' },
       ],
       /**
        * Sometimes you might want to reload `pages` config or restart ViteDevServer when
@@ -113,7 +111,7 @@ export default defineConfig({
   ],
   build: { sourcemap: true },
   server: { port: 5173, open: true },
-  preview: { port: 5173 },
+  preview: { port: 4173 },
   optimizeDeps: { force: true },
   resolve: { alias: { '@': path.resolve('src') } },
 });
