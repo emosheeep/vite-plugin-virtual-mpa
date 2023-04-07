@@ -77,30 +77,7 @@ export function createMpaPlugin<
         // Override the index (default /index.html).
         index: normalizePath(`/${base}/index.html`),
         htmlAcceptHeaders: ['text/html', 'application/xhtml+xml'],
-        rewrites: rewrites.concat([
-          {
-            from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).join('|')})`)),
-            to: ctx => {
-              return normalizePath(`/${base}/${inputMap[ctx.match[1]]}`);
-            },
-          },
-          {
-            from: /\/$/,
-            /**
-             * Support /dir/ without explicit index.html
-             * @see https://github.com/vitejs/vite/blob/main/packages/vite/src/node/server/middlewares/htmlFallback.ts#L13
-             */
-            to({ parsedUrl, request }: any) {
-              const rewritten = decodeURIComponent(parsedUrl.pathname) + 'index.html';
-
-              if (fs.existsSync(rewritten.replace(base, ''))) {
-                return rewritten;
-              }
-
-              return request.url;
-            },
-          },
-        ]),
+        rewrites,
       }),
     );
 
@@ -245,6 +222,11 @@ export function createMpaPlugin<
         }
       });
 
+      // History fallback, custom middlewares
+      if (rewrites?.length) {
+        useHistoryFallbackMiddleware(middlewares, rewrites);
+      }
+
       return () => {
         // Handle html file redirected by history fallback.
         middlewares.use(async (req, res, next) => {
@@ -292,8 +274,10 @@ export function createMpaPlugin<
       };
     },
     configurePreviewServer(server) {
-      // History Fallback
-      useHistoryFallbackMiddleware(server.middlewares, previewRewrites);
+      // History fallback, custom middlewares
+      if (previewRewrites?.length) {
+        useHistoryFallbackMiddleware(server.middlewares, previewRewrites);
+      }
     },
   };
 }
