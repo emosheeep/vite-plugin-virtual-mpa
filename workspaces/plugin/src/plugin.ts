@@ -33,6 +33,7 @@ export function createMpaPlugin<
   let inputMap: Record<string, string> = {};
   let virtualPageMap: Record<string, Page> = {};
   let tplSet: Set<string> = new Set();
+  let rewriteReg: RegExp;
 
   /**
    * Update pages configurations.
@@ -149,6 +150,7 @@ export function createMpaPlugin<
     name: pluginName,
     config(config) {
       configInit(pages); // Init
+      rewriteReg = new RegExp(`${normalizePath(`/${config.base}/`)}(${Object.keys(inputMap).join('|')})(?:\\.html?)?(\\?|#|$).*`);
 
       return {
         appType: 'mpa',
@@ -193,14 +195,11 @@ export function createMpaPlugin<
     transform,
     configureServer(server) {
       const {
-        config,
         watcher,
         middlewares,
         pluginContainer,
         transformIndexHtml,
       } = server;
-
-      const base = normalizePath(`/${config.base || '/'}/`);
 
       if (watchOptions) {
         const {
@@ -218,7 +217,7 @@ export function createMpaPlugin<
           if (events && !events.includes(type)) return;
           if (!isMatch(filename)) return;
 
-          const file = path.relative(config.root, filename);
+          const file = path.relative(resolvedConfig.root, filename);
 
           verbose && console.log(
             `[${pluginName}]: ${color.green(`file ${type}`)} - ${color.dim(file)}`,
@@ -237,7 +236,7 @@ export function createMpaPlugin<
       watcher.on('change', file => {
         if (
           file.endsWith('.html') &&
-          tplSet.has(path.relative(config.root, file))
+          tplSet.has(path.relative(resolvedConfig.root, file))
         ) {
           server.ws.send({
             type: 'full-reload',
@@ -246,49 +245,51 @@ export function createMpaPlugin<
         }
       });
 
-      // History fallback
-      useHistoryFallbackMiddleware(middlewares, rewrites);
+      return () => {
+        // Handle html file redirected by history fallback.
+        middlewares.use(async (req, res, next) => {
+          const { originalUrl, url } = req;
+          const inputMapKey = originalUrl?.match(rewriteReg)?.[1];
+          const fileName = inputMapKey ? inputMap[inputMapKey] : null;
 
-      // Handle html file redirected by history fallback.
-      middlewares.use(async (req, res, next) => {
-        const url = req.url!;
-        // filename in page configuration can't start with '/', because the key of inputMap is relative path.
-        const fileName = url.replace(base, '').replace(/[?#].*$/s, ''); // clean url
+          if (!fileName || !url) {
+            return next(); // This allows vite handling unmatched paths.
+          }
 
-        if (
-          res.writableEnded ||
-          !fileName.endsWith('.html') || // HTML Fallback Middleware appends '.html' to URLs
-          !virtualPageMap[fileName]
-        ) {
-          return next(); // This allows vite handling unmatched paths.
-        }
+          // print rewriting log if verbose is true
+          if (verbose) {
+            console.log(
+              `[${pluginName}]: Rewriting ${color.blue(originalUrl)} to ${color.blue(normalizePath(`/${resolvedConfig.base}/${fileName}`))}`,
+            );
+          }
 
-        /**
-         * The following 2 lines fixed #12.
-         * When using cypress for e2e testing, we should manually set response header and status code.
-         * Otherwise, it causes cypress testing process of cross-entry-page jumping hanging, which results in a timeout error.
-         */
-        res.setHeader('Content-Type', 'text/html');
-        res.statusCode = 200;
+          /**
+           * The following 2 lines fixed #12.
+           * When using cypress for e2e testing, we should manually set response header and status code.
+           * Otherwise, it causes cypress testing process of cross-entry-page jumping hanging, which results in a timeout error.
+           */
+          res.setHeader('Content-Type', 'text/html');
+          res.statusCode = 200;
 
-        // load file
-        let loadResult = await pluginContainer.load(fileName);
-        if (!loadResult) {
-          throw new Error(`Failed to load url ${fileName}`);
-        }
-        loadResult = typeof loadResult === 'string'
-          ? loadResult
-          : loadResult.code;
+          // load file
+          let loadResult = await pluginContainer.load(fileName);
+          if (!loadResult) {
+            throw new Error(`Failed to load url ${fileName}`);
+          }
+          loadResult = typeof loadResult === 'string'
+            ? loadResult
+            : loadResult.code;
 
-        res.end(
-          await transformIndexHtml(
-            url,
-            // No transform applied, keep code as-is
-            transform(loadResult, fileName) ?? loadResult,
-            req.originalUrl,
-          ),
-        );
-      });
+          res.end(
+            await transformIndexHtml(
+              url,
+              // No transform applied, keep code as-is
+              transform(loadResult, fileName) ?? loadResult,
+              originalUrl,
+            ),
+          );
+        });
+      };
     },
     configurePreviewServer(server) {
       // History Fallback
