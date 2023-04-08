@@ -2,8 +2,10 @@ import ejs from 'ejs';
 import color from 'picocolors';
 import fs from 'fs';
 import path from 'path';
+import nodeUrl from 'node:url';
 import history, { Rewrite } from 'connect-history-api-fallback';
 import { name as pkgName } from '../package.json';
+import { evaluateRewriteRule } from './utils';
 import type { MpaOptions, AllowedEvent, Page, WatchOptions, ScanOptions } from './api-types';
 import { type ResolvedConfig, type Plugin, normalizePath, createFilter, ViteDevServer } from 'vite';
 
@@ -222,26 +224,69 @@ export function createMpaPlugin<
         }
       });
 
-      // History fallback, custom middlewares
-      if (rewrites?.length) {
-        useHistoryFallbackMiddleware(middlewares, rewrites);
-      }
-
       return () => {
         // Handle html file redirected by history fallback.
         middlewares.use(async (req, res, next) => {
-          const { originalUrl, url } = req;
-          const inputMapKey = originalUrl?.match(rewriteReg)?.[1];
+          const {
+            method,
+            headers: {
+              accept,
+            },
+            originalUrl,
+            url,
+          } = req;
+
+          if (!method || !['GET', 'HEAD'].includes(method) || !accept || !originalUrl || !url) {
+            return next();
+          }
+
+          // Filter non-html request
+          if (!/.*(text\/html|application\/xhtml\+xml).*/.test(accept)) {
+            return next();
+          }
+
+          const parsedUrl = nodeUrl.parse(originalUrl);
+          const { pathname } = parsedUrl;
+
+          if (!pathname) {
+            return next();
+          }
+
+          // Custom rewrites
+          if (rewrites?.length) {
+            const rewrite = rewrites.find(item => {
+              return item.from.test(pathname);
+            });
+
+            if (rewrite) {
+              const match = pathname.match(rewrite.from);
+
+              if (match) {
+                const rewriteTarget = evaluateRewriteRule(parsedUrl, match, rewrite.to);
+
+                if (verbose) {
+                  console.log(
+                    `[${pluginName}]: Custom Rewriting ${method} ${color.blue(pathname)} to ${color.blue(rewriteTarget)}`,
+                  );
+                }
+
+                req.url = rewriteTarget;
+                return next();
+              }
+            }
+          }
+
+          const inputMapKey = pathname.match(rewriteReg)?.[1];
           const fileName = inputMapKey ? inputMap[inputMapKey] : null;
 
-          if (!fileName || !url) {
+          if (!fileName) {
             return next(); // This allows vite handling unmatched paths.
           }
 
           // print rewriting log if verbose is true
           if (verbose) {
             console.log(
-              `[${pluginName}]: Rewriting ${color.blue(originalUrl)} to ${color.blue(normalizePath(`/${resolvedConfig.base}/${fileName}`))}`,
+              `[${pluginName}]: Rewriting ${method} ${color.blue(pathname)} to ${color.blue(normalizePath(`/${resolvedConfig.base}/${fileName}`))}`,
             );
           }
 
