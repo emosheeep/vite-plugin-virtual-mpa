@@ -2,8 +2,10 @@ import ejs from 'ejs';
 import color from 'picocolors';
 import fs from 'fs';
 import path from 'path';
+import nodeUrl from 'node:url';
 import history, { Rewrite } from 'connect-history-api-fallback';
 import { name as pkgName } from '../package.json';
+import { evaluateRewriteRule } from './utils';
 import type { MpaOptions, AllowedEvent, Page, WatchOptions, ScanOptions } from './api-types';
 import { type ResolvedConfig, type Plugin, normalizePath, createFilter, ViteDevServer } from 'vite';
 
@@ -33,6 +35,7 @@ export function createMpaPlugin<
   let inputMap: Record<string, string> = {};
   let virtualPageMap: Record<string, Page> = {};
   let tplSet: Set<string> = new Set();
+  let rewriteReg: RegExp;
 
   /**
    * Update pages configurations.
@@ -76,30 +79,7 @@ export function createMpaPlugin<
         // Override the index (default /index.html).
         index: normalizePath(`/${base}/index.html`),
         htmlAcceptHeaders: ['text/html', 'application/xhtml+xml'],
-        rewrites: rewrites.concat([
-          {
-            from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).join('|')})`)),
-            to: ctx => {
-              return normalizePath(`/${base}/${inputMap[ctx.match[1]]}`);
-            },
-          },
-          {
-            from: /\/$/,
-            /**
-             * Support /dir/ without explicit index.html
-             * @see https://github.com/vitejs/vite/blob/main/packages/vite/src/node/server/middlewares/htmlFallback.ts#L13
-             */
-            to({ parsedUrl, request }: any) {
-              const rewritten = decodeURIComponent(parsedUrl.pathname) + 'index.html';
-
-              if (fs.existsSync(rewritten.replace(base, ''))) {
-                return rewritten;
-              }
-
-              return request.url;
-            },
-          },
-        ]),
+        rewrites,
       }),
     );
 
@@ -149,6 +129,7 @@ export function createMpaPlugin<
     name: pluginName,
     config(config) {
       configInit(pages); // Init
+      rewriteReg = new RegExp(`${normalizePath(`/${config.base}/`)}(${Object.keys(inputMap).join('|')})(?:\\.html?)?(\\?|#|$).*`);
 
       return {
         appType: 'mpa',
@@ -193,14 +174,11 @@ export function createMpaPlugin<
     transform,
     configureServer(server) {
       const {
-        config,
         watcher,
         middlewares,
         pluginContainer,
         transformIndexHtml,
       } = server;
-
-      const base = normalizePath(`/${config.base || '/'}/`);
 
       if (watchOptions) {
         const {
@@ -218,7 +196,7 @@ export function createMpaPlugin<
           if (events && !events.includes(type)) return;
           if (!isMatch(filename)) return;
 
-          const file = path.relative(config.root, filename);
+          const file = path.relative(resolvedConfig.root, filename);
 
           verbose && console.log(
             `[${pluginName}]: ${color.green(`file ${type}`)} - ${color.dim(file)}`,
@@ -237,7 +215,7 @@ export function createMpaPlugin<
       watcher.on('change', file => {
         if (
           file.endsWith('.html') &&
-          tplSet.has(path.relative(config.root, file))
+          tplSet.has(path.relative(resolvedConfig.root, file))
         ) {
           server.ws.send({
             type: 'full-reload',
@@ -246,53 +224,105 @@ export function createMpaPlugin<
         }
       });
 
-      // History fallback
-      useHistoryFallbackMiddleware(middlewares, rewrites);
-
-      // Handle html file redirected by history fallback.
-      middlewares.use(async (req, res, next) => {
-        const url = req.url!;
-        // filename in page configuration can't start with '/', because the key of inputMap is relative path.
-        const fileName = url.replace(base, '').replace(/[?#].*$/s, ''); // clean url
-
-        if (
-          res.writableEnded ||
-          !fileName.endsWith('.html') || // HTML Fallback Middleware appends '.html' to URLs
-          !virtualPageMap[fileName]
-        ) {
-          return next(); // This allows vite handling unmatched paths.
-        }
-
-        /**
-         * The following 2 lines fixed #12.
-         * When using cypress for e2e testing, we should manually set response header and status code.
-         * Otherwise, it causes cypress testing process of cross-entry-page jumping hanging, which results in a timeout error.
-         */
-        res.setHeader('Content-Type', 'text/html');
-        res.statusCode = 200;
-
-        // load file
-        let loadResult = await pluginContainer.load(fileName);
-        if (!loadResult) {
-          throw new Error(`Failed to load url ${fileName}`);
-        }
-        loadResult = typeof loadResult === 'string'
-          ? loadResult
-          : loadResult.code;
-
-        res.end(
-          await transformIndexHtml(
+      return () => {
+        // Handle html file redirected by history fallback.
+        middlewares.use(async (req, res, next) => {
+          const {
+            method,
+            headers: {
+              accept,
+            },
+            originalUrl,
             url,
-            // No transform applied, keep code as-is
-            transform(loadResult, fileName) ?? loadResult,
-            req.originalUrl,
-          ),
-        );
-      });
+          } = req;
+
+          if (!method || !['GET', 'HEAD'].includes(method) || !accept || !originalUrl || !url) {
+            return next();
+          }
+
+          // Filter non-html request
+          if (!/.*(text\/html|application\/xhtml\+xml).*/.test(accept)) {
+            return next();
+          }
+
+          const parsedUrl = nodeUrl.parse(originalUrl);
+          const { pathname } = parsedUrl;
+
+          if (!pathname) {
+            return next();
+          }
+
+          // Custom rewrites
+          if (rewrites?.length) {
+            const rewrite = rewrites.find(item => {
+              return item.from.test(pathname);
+            });
+
+            if (rewrite) {
+              const match = pathname.match(rewrite.from);
+
+              if (match) {
+                const rewriteTarget = evaluateRewriteRule(parsedUrl, match, rewrite.to);
+
+                if (verbose) {
+                  console.log(
+                    `[${pluginName}]: Custom Rewriting ${method} ${color.blue(pathname)} to ${color.blue(rewriteTarget)}`,
+                  );
+                }
+
+                req.url = rewriteTarget;
+                return next();
+              }
+            }
+          }
+
+          const inputMapKey = pathname.match(rewriteReg)?.[1];
+          const fileName = inputMapKey ? inputMap[inputMapKey] : null;
+
+          if (!fileName) {
+            return next(); // This allows vite handling unmatched paths.
+          }
+
+          // print rewriting log if verbose is true
+          if (verbose) {
+            console.log(
+              `[${pluginName}]: Rewriting ${method} ${color.blue(pathname)} to ${color.blue(normalizePath(`/${resolvedConfig.base}/${fileName}`))}`,
+            );
+          }
+
+          /**
+           * The following 2 lines fixed #12.
+           * When using cypress for e2e testing, we should manually set response header and status code.
+           * Otherwise, it causes cypress testing process of cross-entry-page jumping hanging, which results in a timeout error.
+           */
+          res.setHeader('Content-Type', 'text/html');
+          res.statusCode = 200;
+
+          // load file
+          let loadResult = await pluginContainer.load(fileName);
+          if (!loadResult) {
+            throw new Error(`Failed to load url ${fileName}`);
+          }
+          loadResult = typeof loadResult === 'string'
+            ? loadResult
+            : loadResult.code;
+
+          res.end(
+            await transformIndexHtml(
+              url,
+              // No transform applied, keep code as-is
+              transform(loadResult, fileName) ?? loadResult,
+              originalUrl,
+            ),
+          );
+        });
+      };
     },
     configurePreviewServer(server) {
-      // History Fallback
-      useHistoryFallbackMiddleware(server.middlewares, previewRewrites);
+      // History fallback, custom middlewares
+      if (previewRewrites?.length) {
+        useHistoryFallbackMiddleware(server.middlewares, previewRewrites);
+      }
     },
   };
 }
