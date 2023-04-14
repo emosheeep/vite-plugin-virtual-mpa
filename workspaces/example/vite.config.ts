@@ -64,6 +64,7 @@ export default defineConfig({
         scanDirs: 'src/pages',
         entryFile: 'index.js',
         filename: name => `fruits/${name}.html`,
+        template: '../../template.html',
       },
       /**
        * Use html minimization feature at build time.

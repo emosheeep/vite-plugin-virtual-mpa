@@ -1,3 +1,8 @@
+# 1.8.2
+
+feat: support `scanOptions.template` option.
+chore: update dependencies' version.
+
 # 1.8.1
 
 - fix: `ERR_TOO_MANY_REDIRECTS` when set `base` option and visit base. Closed [#33](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/33)
