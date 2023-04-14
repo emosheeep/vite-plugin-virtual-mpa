@@ -86,14 +86,20 @@ export interface ScanOptions {
    */
   scanDirs: string | string[];
   /**
-   * The entry file path relative to scanned dir.
+   * Customize the **entry file** path relative to the scanned dir.
+   * It doesn't effect when the file specified doesn't exist.
    */
   entryFile?: string;
   /**
-   * Customize the virtual file name(output filename).
+   * Customize the **virtual file** name(output filename).
    * @param name Subdirectory name
    */
   filename?: (name: string) => string;
+  /**
+   * Customize the **template file** path relative to the scanned dir.
+   * It doesn't effect when the file specified doesn't exist.
+   */
+  template?: string
 }
 
 export interface MpaOptions<

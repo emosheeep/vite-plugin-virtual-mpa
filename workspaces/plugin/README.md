@@ -262,7 +262,8 @@ export default defineConfig({
       scanOptions: {
         scanDirs: 'src/fruits',
         entryFile: 'index.js',
-        filename: name => `fruits/${name}.html`
+        filename: name => `fruits/${name}.html`,
+        template: '../../template.html',
       }
       /**
        * Customize the history fallback rewrite rules.

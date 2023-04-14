@@ -19,7 +19,7 @@
     "@vitejs/plugin-vue": "^4.1.0",
     "@vitejs/plugin-vue-jsx": "^3.0.1",
     "vite": "^4.2.1",
-    "vite-plugin-virtual-mpa": "^1.8.0",
-    "vue": "^3.2.45"
+    "vite-plugin-virtual-mpa": "^1.8.2",
+    "vue": "^3.2.47"
   }
 }
