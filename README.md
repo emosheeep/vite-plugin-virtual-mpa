@@ -1,16 +1,12 @@
 # vite-plugin-virtual-mpa
 
-<div style="display: flex;">
-  <a href="https://npmjs.com/package/vite-plugin-virtual-mpa" target="_blank">
-    <img src="https://img.shields.io/npm/v/vite-plugin-virtual-mpa" alt="npm package">
-  </a>
-  <img alt="Publish Package" src="https://github.com/emosheeep/vite-plugin-virtual-mpa/actions/workflows/npm-publish.yml/badge.svg">
-  <img src="https://img.shields.io/npm/dt/vite-plugin-virtual-mpa" alt="npm downloads">
-  <img src="https://img.shields.io/npm/l/vite-plugin-virtual-mpa" alt="npm downloads">
-  <a href="https://packagephobia.com/result?p=vite-plugin-virtual-mpa" target="_blank">
-    <img src="https://packagephobia.com/badge?p=vite-plugin-virtual-mpa" alt="install size">
-  </a>
-</div>
+[![npm version](https://img.shields.io/npm/v/vite-plugin-virtual-mpa)](https://npmjs.com/package/vite-plugin-virtual-mpa)
+[![awesome-vite](https://awesome.re/badge.svg)](https://github.com/vitejs/awesome-vite)
+![weekly downloads](https://img.shields.io/npm/dw/vite-plugin-virtual-mpa)
+![license](https://img.shields.io/npm/l/vite-plugin-virtual-mpa)
+[![install size](https://packagephobia.com/badge?p=vite-plugin-virtual-mpa)](https://packagephobia.com/result?p=vite-plugin-virtual-mpa)
+![publish](https://github.com/emosheeep/vite-plugin-virtual-mpa/actions/workflows/npm-publish.yml/badge.svg)
+
 
 Out-of-box MPA plugin for Vite 📦, with html template engine and virtual files support, generate multiple files using only one template.
 
