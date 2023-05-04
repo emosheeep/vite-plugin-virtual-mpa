@@ -5,7 +5,7 @@ import path from 'path';
 import history, { Rewrite } from 'connect-history-api-fallback';
 import { name as pkgName } from '../package.json';
 import type { MpaOptions, AllowedEvent, Page, WatchOptions } from './api-types';
-import { scanPages } from './utils';
+import { scanPages, replaceSlash } from './utils';
 import {
   type ResolvedConfig,
   type Plugin,
@@ -49,22 +49,30 @@ export function createMpaPlugin<
     const tempVirtualPageMap: typeof virtualPageMap = {};
     const tempTplSet: typeof tplSet = new Set([template]);
 
-    // put detected pages after manual pages
+    // append detected pages
     for (const page of [...pages, ...scanPages(scanOptions)]) {
-      const entryPath = page.filename || `${page.name}.html`;
+      const { name, filename, template, entry } = page;
+
+      for (const item of [name, filename, template, entry]) {
+        if (item && item.includes('\\')) {
+          throwError(`'\\' is not allowed, please use '/' instead, received ${item}`);
+        }
+      }
+
+      const entryPath = filename || `${name}.html`;
       if (entryPath.startsWith('/')) throwError(`Make sure the path relative, received '${entryPath}'`);
-      if (page.name.includes('/')) throwError(`Page name shouldn't include '/', received '${page.name}'`);
-      if (page.entry && !page.entry.startsWith('/')) {
+      if (name.includes('/')) throwError(`Page name shouldn't include '/', received '${name}'`);
+      if (entry && !entry.startsWith('/')) {
         throwError(
-          `Entry must be an absolute path relative to the project root, received '${page.entry}'`,
+          `Entry must be an absolute path relative to the project root, received '${entry}'`,
         );
       }
 
-      if (tempInputMap[page.name]) continue; // ignore the existed pages
+      if (tempInputMap[name]) continue; // ignore the existed pages, which means configs put ahead have higher priority
 
-      tempInputMap[page.name] = entryPath;
+      tempInputMap[name] = entryPath;
       tempVirtualPageMap[entryPath] = page;
-      page.template && tempTplSet.add(page.template);
+      template && tempTplSet.add(template);
     }
     /**
      * Use new configurations instead of the old.
@@ -225,7 +233,7 @@ export function createMpaPlugin<
           if (events && !events.includes(type)) return;
           if (!isMatch(filename)) return;
 
-          const file = path.relative(config.root, filename);
+          const file = replaceSlash(path.relative(config.root, filename));
 
           verbose && console.log(
             `[${pluginName}]: ${color.green(`file ${type}`)} - ${color.dim(file)}`,
@@ -244,7 +252,7 @@ export function createMpaPlugin<
       watcher.on('change', file => {
         if (
           file.endsWith('.html') &&
-          tplSet.has(path.relative(config.root, file))
+          tplSet.has(replaceSlash(path.relative(config.root, file)))
         ) {
           server.ws.send({
             type: 'full-reload',

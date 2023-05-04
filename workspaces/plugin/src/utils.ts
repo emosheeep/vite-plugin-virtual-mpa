@@ -3,6 +3,18 @@ import path from 'path';
 import fs from 'fs';
 
 /**
+ * Replace slash and backslash with single slash.
+ * This uses for cross-platform path parsing.
+ */
+export function replaceSlash<T extends string | undefined | null>(str: T):
+T extends string
+  ? string
+  : T extends undefined | null
+    ? T
+    : never;
+export function replaceSlash(str: any) { return str?.replaceAll(/[\\/]+/g, '/'); }
+
+/**
  * This function simply converts the arguments to an array and returns them.
  * It helps creating pages configuration with type hints independently outside plugin function.
  */
@@ -31,15 +43,21 @@ export function scanPages(scanOptions?: ScanOptions) {
 
       pages.push({
         name,
-        template: fs.existsSync(tplPath)
-          ? tplPath as Page['template']
-          : undefined,
-        entry: fs.existsSync(entryPath)
-          ? path.join('/', entryPath) as Page['entry']
-          : undefined,
-        filename: typeof filename === 'function'
-          ? filename(name) as Page['filename']
-          : undefined,
+        template: replaceSlash(
+          fs.existsSync(tplPath)
+            ? tplPath
+            : undefined,
+        ) as Page['template'],
+        entry: replaceSlash(
+          fs.existsSync(entryPath)
+            ? path.join('/', entryPath)
+            : undefined,
+        ) as Page['entry'],
+        filename: replaceSlash(
+          typeof filename === 'function'
+            ? filename(name)
+            : undefined,
+        ) as Page['filename'],
       });
     }
   }
