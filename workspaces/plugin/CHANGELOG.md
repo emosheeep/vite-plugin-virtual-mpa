@@ -1,7 +1,12 @@
+# 1.8.3
+
+- fix: Add cross-platform path parsing support. Closed [#41](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/41)
+- chore: update dependencies.
+
 # 1.8.2
 
-feat: support `scanOptions.template` option.
-chore: update dependencies' version.
+- feat: support `scanOptions.template` option.
+- chore: update dependencies' version.
 
 # 1.8.1
 
