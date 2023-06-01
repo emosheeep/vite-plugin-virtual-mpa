@@ -2,9 +2,9 @@ import ejs from 'ejs';
 import color from 'picocolors';
 import fs from 'fs';
 import path from 'path';
-import history, { Rewrite } from 'connect-history-api-fallback';
+import history from 'connect-history-api-fallback';
 import { name as pkgName } from '../package.json';
-import type { MpaOptions, AllowedEvent, Page, WatchOptions } from './api-types';
+import type { MpaOptions, AllowedEvent, Page, WatchOptions, RewriteRule } from './api-types';
 import { scanPages, replaceSlash } from './utils';
 import {
   type ResolvedConfig,
@@ -82,8 +82,10 @@ export function createMpaPlugin<
     tplSet = tempTplSet;
   }
 
-  function useHistoryFallbackMiddleware(middlewares: ViteDevServer['middlewares'], rewrites: Rewrite[] = []) {
+  function useHistoryFallbackMiddleware(middlewares: ViteDevServer['middlewares'], rewrites: RewriteRule = []) {
     const { base } = resolvedConfig;
+
+    if (rewrites === false) return; // Disable rewriting if passing false, closed #44.
 
     middlewares.use(
       // @ts-ignore

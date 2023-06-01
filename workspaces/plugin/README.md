@@ -91,6 +91,7 @@ If your project is using Vite workflow and is an MPA application, you may want t
 
 ```ts
 type FilterPattern = string | RegExp | (string | RegExp)[]
+type RewriteRule = false | Rewrite[]
 interface WatchHandler {
   (ctx: {
     server: ViteDevServer,
@@ -119,12 +120,12 @@ interface MpaOptions {
    * Configure your rewrite rules, only proceed html requests.
    * @see https://github.com/bripkens/connect-history-api-fallback
    */
-  rewrites?: Rewrite[],
+  rewrites?: RewriteRule,
   /**
    * Configure your preview server's rewrite rules.
    * @see https://github.com/bripkens/connect-history-api-fallback
    */
-  previewRewrites?: Rewrite[],
+  previewRewrites?: RewriteRule,
   /**
    * Use to scan directories that have similar structure to generate pages.
    * Detected pages will be appended to `pages` option, page with name existed will be ignored.
