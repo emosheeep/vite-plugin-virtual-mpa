@@ -88,6 +88,7 @@ export default defineConfig({
 
 ```ts
 type FilterPattern = string | RegExp | (string | RegExp)[]
+type RewriteRule = false | Rewrite[]
 interface WatchHandler {
   (ctx: {
     server: ViteDevServer,
@@ -116,12 +117,12 @@ interface MpaOptions {
    * 为开发服务器配置 fallback rewrite rules，只会处理 accept=text/html 的文件请求。
    * @see https://github.com/bripkens/connect-history-api-fallback
    */
-  rewrites?: Rewrite[],
+  rewrites?: RewriteRule,
   /**
    * 为预览服务器配置重定向规则，配置方式同 rewrites。
    * @see https://github.com/bripkens/connect-history-api-fallback
    */
-  previewRewrites?: Rewrite[],
+  previewRewrites?: RewriteRule,
   /**
    * 用于扫描相似的目录结构，自动生成 pages 配置。
    * 扫描到的配置会追加到 `pages` 中，具有相同 name 的 page 将被忽略

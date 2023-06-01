@@ -1,16 +1,20 @@
+# 1.9.0
+
+feat: Support disable default rewrite rules by passing `false`. Closed [#44](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/44).
+
 # 1.8.3
 
-- fix: Add cross-platform path parsing support. Closed [#41](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/41)
-- chore: update dependencies.
+- fix: Add cross-platform path parsing support. Closed [#41](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/41).
+- chore: Update dependencies.
 
 # 1.8.2
 
-- feat: support `scanOptions.template` option.
-- chore: update dependencies' version.
+- feat: Support `scanOptions.template` option.
+- chore: Update dependencies' version.
 
 # 1.8.1
 
-- fix: `ERR_TOO_MANY_REDIRECTS` when set `base` option and visit base. Closed [#33](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/33)
+- fix: `ERR_TOO_MANY_REDIRECTS` when set `base` option and visit base. Closed [#33](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/33).
 - feat: Support `/dir/` without explicit `index.html` refer to the implementation of vite.
 - chore: Preserve the priority of `clearScreen` option provided by user.
 
