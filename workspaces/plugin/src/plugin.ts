@@ -59,8 +59,8 @@ export function createMpaPlugin<
         }
       }
 
-      const entryPath = filename || `${name}.html`;
-      if (entryPath.startsWith('/')) throwError(`Make sure the path relative, received '${entryPath}'`);
+      const virtualFilename = filename || `${name}.html`;
+      if (virtualFilename.startsWith('/')) throwError(`Make sure the path relative, received '${virtualFilename}'`);
       if (name.includes('/')) throwError(`Page name shouldn't include '/', received '${name}'`);
       if (entry && !entry.startsWith('/')) {
         throwError(
@@ -70,8 +70,8 @@ export function createMpaPlugin<
 
       if (tempInputMap[name]) continue; // ignore the existed pages, which means configs put ahead have higher priority
 
-      tempInputMap[name] = entryPath;
-      tempVirtualPageMap[entryPath] = page;
+      tempInputMap[name] = virtualFilename;
+      tempVirtualPageMap[virtualFilename] = page;
       template && tempTplSet.add(template);
     }
     /**
@@ -134,34 +134,6 @@ export function createMpaPlugin<
     }
   }
 
-  /**
-   * Template file transform.
-   */
-  function transform(fileContent, id) {
-    const page = virtualPageMap[id];
-    /**
-     * Fixed #19.
-     * Always return `null` if there're no modifications applied.
-     * Otherwise it may cause building warnings when `build.sourcemap` enabled.
-     */
-    if (!page) return null;
-
-    return ejs.render(
-      !page.entry
-        ? fileContent
-        : fileContent.replace(
-          bodyInject,
-          `<script type="module" src="${normalizePath(
-            `${page.entry}`,
-          )}"></script>\n</body>`,
-        ),
-      // Variables injection
-      { ...resolvedConfig.env, ...page.data },
-      // For error report
-      { filename: id, root: resolvedConfig.root },
-    );
-  }
-
   return {
     name: pluginName,
     config(config) {
@@ -205,9 +177,22 @@ export function createMpaPlugin<
     load(id) {
       const page = virtualPageMap[id];
       if (!page) return null;
-      return fs.readFileSync(page.template || template, 'utf-8');
+      const templateContent = fs.readFileSync(page.template || template, 'utf-8');
+      return ejs.render(
+        !page.entry
+          ? templateContent
+          : templateContent.replace(
+            bodyInject,
+            `<script type="module" src="${normalizePath(
+              `${page.entry}`,
+            )}"></script>\n</body>`,
+          ),
+        // Variables injection
+        { ...resolvedConfig.env, ...page.data },
+        // For error report
+        { filename: id, root: resolvedConfig.root },
+      );
     },
-    transform,
     configureServer(server) {
       const {
         config,
@@ -289,19 +274,17 @@ export function createMpaPlugin<
         res.statusCode = 200;
 
         // load file
-        let loadResult = await pluginContainer.load(fileName);
+        const loadResult = await pluginContainer.load(fileName);
         if (!loadResult) {
           throw new Error(`Failed to load url ${fileName}`);
         }
-        loadResult = typeof loadResult === 'string'
-          ? loadResult
-          : loadResult.code;
 
         res.end(
           await transformIndexHtml(
             url,
-            // No transform applied, keep code as-is
-            transform(loadResult, fileName) ?? loadResult,
+            typeof loadResult === 'string'
+              ? loadResult
+              : loadResult.code,
             req.originalUrl,
           ),
         );
