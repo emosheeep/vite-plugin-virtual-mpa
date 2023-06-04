@@ -1,3 +1,7 @@
+# 1.9.1
+
+fix: On windows, when base is set to "" or "./", the output resource path is incorrect. Fixed [#43](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/43).
+
 # 1.9.0
 
 feat: Support disable default rewrite rules by passing `false`. Closed [#44](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/44).
