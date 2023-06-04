@@ -14,6 +14,7 @@ import {
   createFilter,
 } from 'vite';
 
+const PREFIX = '\0virtual-page:';
 const bodyInject = /<\/body>/;
 const pluginName = color.cyan(pkgName);
 
@@ -149,7 +150,8 @@ export function createMpaPlugin<
         },
         build: {
           rollupOptions: {
-            input: inputMap,
+            input: Object.values(inputMap)
+              .map(v => PREFIX + v), // Use PREFIX to distinguish these files from others.
           },
         },
       };
@@ -166,15 +168,20 @@ export function createMpaPlugin<
     /**
      * Intercept virtual html requests.
      */
-    resolveId(id, importer, options) {
-      if (options.isEntry && virtualPageMap[id]) {
-        return id;
-      }
+    resolveId(id) {
+      return id.startsWith(PREFIX)
+        /**
+         * Entry paths here must be absolute, otherwise it may cause problem on Windows. Closes #43
+         * @see https://github.com/vitejs/vite/issues/9771
+         */
+        ? path.resolve(resolvedConfig.root, id.slice(PREFIX.length))
+        : undefined;
     },
     /**
      * Get html according to page configurations.
      */
     load(id) {
+      id = replaceSlash(path.relative(resolvedConfig.root, id));
       const page = virtualPageMap[id];
       if (!page) return null;
       const templateContent = fs.readFileSync(page.template || template, 'utf-8');
