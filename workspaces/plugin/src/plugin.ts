@@ -281,7 +281,7 @@ export function createMpaPlugin<
         res.statusCode = 200;
 
         // load file
-        const loadResult = await pluginContainer.load(fileName);
+        const loadResult = await pluginContainer.load(path.resolve(config.root,fileName));
         if (!loadResult) {
           throw new Error(`Failed to load url ${fileName}`);
         }
