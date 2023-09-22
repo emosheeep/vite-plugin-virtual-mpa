@@ -1,3 +1,7 @@
+# 1.9.2
+
+fix: Support `root` option at development, closed [#50](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/50).
+
 # 1.9.1
 
 fix: On windows, when base is set to "" or "./", the output resource path is incorrect. Fixed [#43](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/43).

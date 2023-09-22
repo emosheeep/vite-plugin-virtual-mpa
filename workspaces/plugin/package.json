@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-virtual-mpa",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "license": "MIT",
   "author": "秦旭洋",
   "main": "dist/index.js",
