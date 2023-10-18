@@ -1,3 +1,8 @@
+# 1.9.3
+
+fix: Built-in matching rules preferentially match longer paths. Closed [#52](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/52).
+chore: Upgrade all of workspace dependencies.
+
 # 1.9.2
 
 fix: Support `root` option at development, closed [#50](https://github.com/emosheeep/vite-plugin-virtual-mpa/issues/50).

@@ -40,7 +40,7 @@ export function createMpaPlugin<
 
   let inputMap: Record<string, string> = {};
   let virtualPageMap: Record<string, Page> = {};
-  let tplSet: Set<string> = new Set();
+  let tplSet = new Set<string>();
 
   /**
    * Update pages configurations.
@@ -96,6 +96,10 @@ export function createMpaPlugin<
         htmlAcceptHeaders: ['text/html', 'application/xhtml+xml'],
         rewrites: rewrites.concat([
           {
+            /**
+             * Put built-in matching rules in order of length so that to preferentially match longer paths.
+             * Closed #52.
+             */
             from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).sort((a, b) => b.length - a.length).join('|')})`)),
             to: ctx => {
               return normalizePath(`/${base}/${inputMap[ctx.match[1]]}`);
@@ -218,8 +222,8 @@ export function createMpaPlugin<
           include,
           excluded,
         } = typeof watchOptions === 'function'
-          ? { handler: watchOptions } as WatchOptions<Event>
-          : watchOptions;
+            ? { handler: watchOptions } as WatchOptions<Event>
+            : watchOptions;
 
         const isMatch = createFilter(include || /.*/, excluded);
 
