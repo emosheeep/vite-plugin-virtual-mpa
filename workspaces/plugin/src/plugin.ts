@@ -96,7 +96,7 @@ export function createMpaPlugin<
         htmlAcceptHeaders: ['text/html', 'application/xhtml+xml'],
         rewrites: rewrites.concat([
           {
-            from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).join('|')})`)),
+            from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).sort((a, b) => b.length - a.length).join('|')})`)),
             to: ctx => {
               return normalizePath(`/${base}/${inputMap[ctx.match[1]]}`);
             },
