@@ -42,6 +42,14 @@ const pages = createPages([
       title: 'This is Home page',
     },
   },
+  {
+    name: 'home2',
+    filename: 'fruits/home2.html',
+    entry: '/src/pages/home2/index.js',
+    data: {
+      title: 'This is Home2 page',
+    },
+  },
 ]);
 
 // https://vitejs.dev/config/
@@ -75,14 +83,14 @@ export default defineConfig({
        * If you config your pages as above, this rewrite rules will be automatically generated.
        * Otherwise you should manually write it, which will overwrite the default.
        */
-      rewrites: [
-        {
-          from: new RegExp(
-            normalizePath(`/${base}/(apple|banana|strawberries|home)`),
-          ),
-          to: (ctx) => normalizePath(`/${base}/fruits/${ctx.match[1]}.html`),
-        },
-      ],
+      // rewrites: [
+      //   {
+      //     from: new RegExp(
+      //       normalizePath(`/${base}/(apple|banana|strawberries|home2|home)`),
+      //     ),
+      //     to: (ctx) => normalizePath(`/${base}/fruits/${ctx.match[1]}.html`),
+      //   },
+      // ],
       /**
        * Customize the history fallback rewrite rules for `preview server`.
        * This option is almost the same with `rewrites`.
