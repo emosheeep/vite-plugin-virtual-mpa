@@ -27,7 +27,6 @@ module.exports = defineConfig({
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/semi': ['error', 'always'],
-    '@typescript-eslint/indent': ['error', 2],
     '@typescript-eslint/comma-dangle': ['error', 'always-multiline'],
     '@typescript-eslint/space-before-function-paren': ['error', {
       anonymous: 'never',
