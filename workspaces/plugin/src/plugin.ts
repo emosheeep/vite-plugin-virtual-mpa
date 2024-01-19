@@ -35,6 +35,7 @@ export function createMpaPlugin<
     previewRewrites,
     watchOptions,
     scanOptions,
+    transformTemplateHtml,
   } = config;
   let resolvedConfig: ResolvedConfig;
 
@@ -188,7 +189,10 @@ export function createMpaPlugin<
       id = replaceSlash(path.relative(resolvedConfig.root, id));
       const page = virtualPageMap[id];
       if (!page) return null;
-      const templateContent = fs.readFileSync(page.template || template, 'utf-8');
+      let templateContent = fs.readFileSync(page.template || template, 'utf-8');
+      if (transformTemplateHtml) {
+        templateContent = transformTemplateHtml(templateContent, page);
+      }
       return ejs.render(
         !page.entry
           ? templateContent
