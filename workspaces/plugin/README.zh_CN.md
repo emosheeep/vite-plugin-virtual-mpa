@@ -5,7 +5,6 @@
 ![weekly downloads](https://img.shields.io/npm/dw/vite-plugin-virtual-mpa)
 ![license](https://img.shields.io/npm/l/vite-plugin-virtual-mpa)
 [![install size](https://packagephobia.com/badge?p=vite-plugin-virtual-mpa)](https://packagephobia.com/result?p=vite-plugin-virtual-mpa)
-![publish](https://github.com/emosheeep/vite-plugin-virtual-mpa/actions/workflows/npm-publish.yml/badge.svg)
 
 开箱即用的 Vite MPA插件 📦，支持HTML模板引擎和虚拟文件功能，能够使用一份模板生成多个文件。
 

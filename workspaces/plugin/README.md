@@ -5,7 +5,6 @@
 ![weekly downloads](https://img.shields.io/npm/dw/vite-plugin-virtual-mpa)
 ![license](https://img.shields.io/npm/l/vite-plugin-virtual-mpa)
 [![install size](https://packagephobia.com/badge?p=vite-plugin-virtual-mpa)](https://packagephobia.com/result?p=vite-plugin-virtual-mpa)
-![publish](https://github.com/emosheeep/vite-plugin-virtual-mpa/actions/workflows/npm-publish.yml/badge.svg)
 
 Out-of-box MPA plugin for Vite 📦, with html template engine and virtual files support, generate multiple files using only one template.
 

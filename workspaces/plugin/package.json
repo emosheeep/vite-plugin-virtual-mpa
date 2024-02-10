@@ -37,7 +37,9 @@
   "scripts": {
     "prepublishOnly": "npm run build",
     "dev": "vite build --watch",
-    "build": "vite build"
+    "build": "vite build",
+    "changeset": "changeset",
+    "versions": "changeset version"
   },
   "dependencies": {
     "@types/connect-history-api-fallback": "^1.5.4",
