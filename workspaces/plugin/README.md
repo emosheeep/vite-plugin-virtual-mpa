@@ -100,9 +100,13 @@ interface MpaOptions {
    */
   previewRewrites?: RewriteRule,
   /**
-   * Dedicated hook for transforming template HTML.
+   * Dedicated hook for transforming template HTML, inherit from `transformIndexHtml`.
+   * @see https://vitejs.dev/guide/api-plugin#transformindexhtml
    */
-  transformHtml?: (html: string, page: Page) => string;
+  transformHtml?: (
+    html: string,
+    ctx: IndexHtmlTransformContext & { page: Page },
+  ) => IndexHtmlTransformResult;
   /**
    * Use to scan directories that have similar structure to generate pages.
    * Detected pages will be appended to `pages` option, page with name existed will be ignored.
@@ -256,7 +260,20 @@ export default defineConfig({
       previewRewrites: [
         // If there's no index.html, you need to manually set rules for history fallback like:
         { from: /.*/, to: '/home.html' },
-      ]
+      ],
+      /** Customize HTML */
+      transformHtml(html, ctx) {
+        return {
+          html,
+          tags: [
+            {
+              tag: 'div',
+              injectTo: 'body-prepend',
+              children: `[Auto Injected] Page name: ${ctx.page.name}`,
+            },
+          ],
+        };
+      },
     }),
   ],
 })

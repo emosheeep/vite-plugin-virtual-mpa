@@ -115,6 +115,18 @@ export default defineConfig({
           // ctx.reloadPages();
         },
       },
+      transformHtml(html, ctx) {
+        return {
+          html,
+          tags: [
+            {
+              tag: 'div',
+              injectTo: 'body-prepend',
+              children: `[Auto Injected] Page name: ${ctx.page.name}`,
+            },
+          ],
+        };
+      },
     }),
   ],
   build: { sourcemap: true },

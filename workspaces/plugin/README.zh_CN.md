@@ -96,9 +96,13 @@ interface MpaOptions {
    */
   previewRewrites?: RewriteRule,
   /**
-   * 处理模版 HTML 文件。
+   * 处理模版 HTML 文件，继承自 `transformIndexHtml`。
+   * @see https://vitejs.dev/guide/api-plugin#transformindexhtml
    */
-  transformHtml?: (html: string, page: Page) => string;
+  transformHtml?: (
+    html: string,
+    ctx: IndexHtmlTransformContext & { page: Page },
+  ) => IndexHtmlTransformResult;
   /**
    * 用于扫描相似的目录结构，自动生成 pages 配置。
    * 扫描到的配置会追加到 `pages` 中，具有相同 name 的 page 将被忽略
@@ -247,7 +251,20 @@ export default defineConfig({
       previewRewrites: [
         // 如果产物目录没有 index.html，你需要手动配置规则，以便服务器能正确找到入口文件。
         { from: /.*/, to: '/home.html' },
-      ]
+      ],
+      /** 自定义处理模板内容 */
+      transformHtml(html, ctx) {
+        return {
+          html,
+          tags: [
+            {
+              tag: 'div',
+              injectTo: 'body-prepend',
+              children: `[Auto Injected] Page name: ${ctx.page.name}`,
+            },
+          ],
+        };
+      },
     }),
   ],
 })
