@@ -1,6 +1,11 @@
-import type { FilterPattern, ViteDevServer } from 'vite';
 import type { Rewrite } from 'connect-history-api-fallback';
 import type { Options } from 'html-minifier-terser';
+import type {
+  FilterPattern,
+  ViteDevServer,
+  IndexHtmlTransformContext,
+  IndexHtmlTransformResult,
+} from 'vite';
 
 export type AllowedEvent = 'add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir';
 
@@ -141,9 +146,13 @@ export interface MpaOptions<
    */
   scanOptions?: ScanOptions;
   /**
-   * Dedicated hook for transforming template HTML.
+   * Dedicated hook for transforming template HTML, inherit from `transformIndexHtml`.
+   * @see https://vitejs.dev/guide/api-plugin#transformindexhtml
    */
-  transformHtml?: (html: string, page: Page) => string;
+  transformHtml?: (
+    html: string,
+    ctx: IndexHtmlTransformContext & { page: Page },
+  ) => IndexHtmlTransformResult;
   /**
    * Whether to minify html file. Powered by [html-minify-terser](https://github.com/terser/html-minifier-terser).
    * @default false

@@ -11,7 +11,7 @@ import type {
   WatchOptions,
   RewriteRule,
 } from './api-types';
-import { scanPages, replaceSlash } from './utils';
+import { scanPages, replaceSlash, resolvePageById } from './utils';
 import {
   type ResolvedConfig,
   type Plugin,
@@ -208,17 +208,12 @@ export function createMpaPlugin<
      * Get html according to page configurations.
      */
     load(id) {
-      id = replaceSlash(path.relative(resolvedConfig.root, id));
-      const page = virtualPageMap[id];
+      const page = resolvePageById(id, resolvedConfig.root, virtualPageMap);
       if (!page) return null;
-      let templateContent = fs.readFileSync(page.template || template, 'utf-8');
-      /**
-       * Transform before building.
-       * @see https://github.com/emosheeep/vite-plugin-virtual-mpa/pull/56
-       */
-      if (typeof transformHtml === 'function') {
-        templateContent = transformHtml(templateContent, page);
-      }
+      const templateContent = fs.readFileSync(
+        page.template || template,
+        'utf-8',
+      );
       return ejs.render(
         !page.entry
           ? templateContent
@@ -232,6 +227,20 @@ export function createMpaPlugin<
         { ...resolvedConfig.env, ...page.data },
         // For error report
         { filename: id, root: resolvedConfig.root },
+      );
+    },
+    transformIndexHtml(html, ctx) {
+      const page = resolvePageById(
+        ctx.filename,
+        resolvedConfig.root,
+        virtualPageMap,
+      );
+      return (
+        page &&
+        transformHtml?.(html, {
+          ...ctx,
+          page,
+        })
       );
     },
     configureServer(server) {
@@ -279,7 +288,8 @@ export function createMpaPlugin<
           file.endsWith('.html') &&
           tplSet.has(replaceSlash(path.relative(config.root, file)))
         ) {
-          server.ws.send({
+          // `server.hot` is available in v5.1+
+          (server.ws || server.hot).send({
             type: 'full-reload',
             path: '*',
           });

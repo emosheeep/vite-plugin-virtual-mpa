@@ -58,3 +58,11 @@ export function scanPages(scanOptions?: ScanOptions) {
 
   return pages;
 }
+
+export function resolvePageById(
+  id: string,
+  root: string,
+  pageMap: Record<string, Page>,
+): Page | undefined {
+  return pageMap[replaceSlash(path.relative(root, id))];
+}
