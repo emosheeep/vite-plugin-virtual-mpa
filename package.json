@@ -46,6 +46,6 @@
   },
   "simple-git-hooks": {
     "commit-msg": "npx commitlint -e",
-    "pre-commit": "npx lint-staged"
+    "pre-commit": "npx lint-staged && npx tsc --noEmit"
   }
 }

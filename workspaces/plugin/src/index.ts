@@ -12,14 +12,12 @@ export function createMpaPlugin<
   PT extends string,
   Event extends AllowedEvent,
   TPL extends string,
->(
-  config: MpaOptions<PN, PFN, PT, Event, TPL>,
-): Plugin[] {
+>(config: MpaOptions<PN, PFN, PT, Event, TPL>): Plugin[] {
   const { htmlMinify } = config;
   return !htmlMinify
     ? [mpaPlugin(config)]
     : [
-      mpaPlugin(config),
-      htmlMinifyPlugin(htmlMinify === true ? {} : htmlMinify),
-    ];
+        mpaPlugin(config),
+        htmlMinifyPlugin(htmlMinify === true ? {} : htmlMinify),
+      ];
 }

@@ -6,7 +6,7 @@ import dtsPlugin from 'vite-plugin-dts';
 export default defineConfig({
   plugins: [
     externalizeDeps(),
-    dtsPlugin({ skipDiagnostics: true }),
+    dtsPlugin(),
     viteChecker({
       typescript: true,
       eslint: {

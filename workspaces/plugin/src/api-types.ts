@@ -4,12 +4,11 @@ import type { Options } from 'html-minifier-terser';
 
 export type AllowedEvent = 'add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir';
 
-export type TplStr<T extends string> =
-  T extends `/${infer P}`
-    ? TplStr<P>
-    : T extends `${infer Q}.html`
-      ? TplStr<Q>
-      : `${T}.html`;
+export type TplStr<T extends string> = T extends `/${infer P}`
+  ? TplStr<P>
+  : T extends `${infer Q}.html`
+    ? TplStr<Q>
+    : `${T}.html`;
 
 export interface Page<
   Name extends string = string,
@@ -25,59 +24,55 @@ export interface Page<
    * Relative path to the output directory, which should end with .html and not startWith '/'
    * @default `${name}.html`
    */
-  filename?: TplStr<Filename>
+  filename?: TplStr<Filename>;
   /**
    * **Higher priority template file**, which will overwrite the default template.
    */
-  template?: TplStr<Tpl>
+  template?: TplStr<Tpl>;
   /**
    * Entry file that will append to body, which you should remove from the html template file.
    * It must always start with `'/'` which represents your project root directory.
    */
-  entry?: `/${string}`
+  entry?: `/${string}`;
   /**
    * Data to inject with ejs.
    */
-  data?: Record<string, any>
+  data?: Record<string, any>;
 }
 
-export type WatchHandler<Event extends AllowedEvent = AllowedEvent> = (
-  ctx: {
-    server: ViteDevServer,
-    file: string,
-    type: Event
-    /**
-     * You can update the pages configuration by calling this function.
-     * @params pages Your MPA core configurations, which will replace default `pages` config
-     */
-    reloadPages: <
-      PN extends string,
-      PFN extends string,
-      PT extends string,
-    >(pages: Page<PN, PFN, PT>[]) => void
-  }
-) => void;
+export type WatchHandler<Event extends AllowedEvent = AllowedEvent> = (ctx: {
+  server: ViteDevServer;
+  file: string;
+  type: Event;
+  /**
+   * You can update the pages configuration by calling this function.
+   * @params pages Your MPA core configurations, which will replace default `pages` config
+   */
+  reloadPages: <PN extends string, PFN extends string, PT extends string>(
+    pages: Page<PN, PFN, PT>[],
+  ) => void;
+}) => void;
 
-export interface WatchOptions<Event extends AllowedEvent = AllowedEvent>{
+export interface WatchOptions<Event extends AllowedEvent = AllowedEvent> {
   /**
    * Specifies the files to **include**, based on `Rollup.createFilter`
    * @see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
    */
-  include?: Exclude<FilterPattern, null>,
+  include?: Exclude<FilterPattern, null>;
   /**
    * Specifies the files to **exclude**, based on `Rollup.createFilter`
    * @see https://vitejs.dev/guide/api-plugin.html#filtering-include-exclude-pattern
    */
-  excluded?: Exclude<FilterPattern, null>,
+  excluded?: Exclude<FilterPattern, null>;
   /**
    * File events you wanna deal with.
    * @default ['add', 'unlink', 'change', 'unlinkDir', 'addDir']
    */
-  events?: Event[],
+  events?: Event[];
   /**
    * Execute your own logic when file events fired.
    */
-  handler: WatchHandler<Event>
+  handler: WatchHandler<Event>;
 }
 
 export interface ScanOptions {
@@ -99,7 +94,7 @@ export interface ScanOptions {
    * Customize the **template file** path relative to the scanned dir.
    * It doesn't effect when the file specified doesn't exist.
    */
-  template?: string
+  template?: string;
 }
 
 export type RewriteRule = false | Rewrite[];

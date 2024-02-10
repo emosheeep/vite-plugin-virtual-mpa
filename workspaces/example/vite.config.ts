@@ -71,7 +71,7 @@ export default defineConfig({
       scanOptions: {
         scanDirs: 'src/pages',
         entryFile: 'index.js',
-        filename: name => `fruits/${name}.html`,
+        filename: (name) => `fruits/${name}.html`,
         template: '../../template.html',
       },
       /**
@@ -109,10 +109,7 @@ export default defineConfig({
        */
       watchOptions: {
         events: ['add', 'unlink', 'change'],
-        include: [
-          '**/pages/**',
-          '**/infos/**',
-        ],
+        include: ['**/pages/**', '**/infos/**'],
         handler: (ctx) => {
           console.log(ctx.type, ctx.file);
           // ctx.reloadPages();

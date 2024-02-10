@@ -1,4 +1,4 @@
 export default {
-  '**/*.{ts,tsx,js,jsx}': ['eslint', 'tsc --noEmit --allowJs'],
+  '**/*.{ts,tsx,js,jsx}': ['eslint'],
   '**/*.{js,ts,jsx,tsx,md,css}': ['prettier --check'],
 };

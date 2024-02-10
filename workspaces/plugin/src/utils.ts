@@ -6,13 +6,12 @@ import fs from 'fs';
  * Replace slash and backslash with single slash.
  * This uses for cross-platform path parsing.
  */
-export function replaceSlash<T extends string | undefined | null>(str: T):
-T extends string
-  ? string
-  : T extends undefined | null
-    ? T
-    : never;
-export function replaceSlash(str: any) { return str?.replaceAll(/[\\/]+/g, '/'); }
+export function replaceSlash<T extends string | undefined | null>(
+  str: T,
+): T extends string ? string : T extends undefined | null ? T : never;
+export function replaceSlash(str: any) {
+  return str?.replaceAll(/[\\/]+/g, '/');
+}
 
 /**
  * This function simply converts the arguments to an array and returns them.
@@ -30,7 +29,8 @@ export function createPages<
  * Generate pages configurations using scanOptions.
  */
 export function scanPages(scanOptions?: ScanOptions) {
-  const { filename, entryFile, scanDirs, template } = scanOptions || {} as ScanOptions;
+  const { filename, entryFile, scanDirs, template } =
+    scanOptions || ({} as ScanOptions);
   const pages: Page[] = [];
 
   for (const entryDir of [scanDirs].flat().filter(Boolean)) {
@@ -44,19 +44,13 @@ export function scanPages(scanOptions?: ScanOptions) {
       pages.push({
         name,
         template: replaceSlash(
-          fs.existsSync(tplPath)
-            ? tplPath
-            : undefined,
+          fs.existsSync(tplPath) ? tplPath : undefined,
         ) as Page['template'],
         entry: replaceSlash(
-          fs.existsSync(entryPath)
-            ? path.join('/', entryPath)
-            : undefined,
+          fs.existsSync(entryPath) ? path.join('/', entryPath) : undefined,
         ) as Page['entry'],
         filename: replaceSlash(
-          typeof filename === 'function'
-            ? filename(name)
-            : undefined,
+          typeof filename === 'function' ? filename(name) : undefined,
         ) as Page['filename'],
       });
     }

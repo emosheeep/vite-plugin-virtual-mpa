@@ -4,7 +4,13 @@ import fs from 'fs';
 import path from 'path';
 import history from 'connect-history-api-fallback';
 import { name as pkgName } from '../package.json';
-import type { MpaOptions, AllowedEvent, Page, WatchOptions, RewriteRule } from './api-types';
+import type {
+  MpaOptions,
+  AllowedEvent,
+  Page,
+  WatchOptions,
+  RewriteRule,
+} from './api-types';
 import { scanPages, replaceSlash } from './utils';
 import {
   type ResolvedConfig,
@@ -24,9 +30,7 @@ export function createMpaPlugin<
   PT extends string,
   Event extends AllowedEvent,
   TPL extends string,
->(
-  config: MpaOptions<PN, PFN, PT, Event, TPL>,
-): Plugin {
+>(config: MpaOptions<PN, PFN, PT, Event, TPL>): Plugin {
   const {
     template = 'index.html',
     verbose = true,
@@ -57,13 +61,19 @@ export function createMpaPlugin<
 
       for (const item of [name, filename, template, entry]) {
         if (item && item.includes('\\')) {
-          throwError(`'\\' is not allowed, please use '/' instead, received ${item}`);
+          throwError(
+            `'\\' is not allowed, please use '/' instead, received ${item}`,
+          );
         }
       }
 
       const virtualFilename = filename || `${name}.html`;
-      if (virtualFilename.startsWith('/')) throwError(`Make sure the path relative, received '${virtualFilename}'`);
-      if (name.includes('/')) throwError(`Page name shouldn't include '/', received '${name}'`);
+      if (virtualFilename.startsWith('/'))
+        throwError(
+          `Make sure the path relative, received '${virtualFilename}'`,
+        );
+      if (name.includes('/'))
+        throwError(`Page name shouldn't include '/', received '${name}'`);
       if (entry && !entry.startsWith('/')) {
         throwError(
           `Entry must be an absolute path relative to the project root, received '${entry}'`,
@@ -84,7 +94,10 @@ export function createMpaPlugin<
     tplSet = tempTplSet;
   }
 
-  function useHistoryFallbackMiddleware(middlewares: ViteDevServer['middlewares'], rewrites: RewriteRule = []) {
+  function useHistoryFallbackMiddleware(
+    middlewares: ViteDevServer['middlewares'],
+    rewrites: RewriteRule = [],
+  ) {
     const { base } = resolvedConfig;
 
     if (rewrites === false) return; // Disable rewriting if passing false, closed #44.
@@ -101,8 +114,14 @@ export function createMpaPlugin<
              * Put built-in matching rules in order of length so that to preferentially match longer paths.
              * Closed #52.
              */
-            from: new RegExp(normalizePath(`/${base}/(${Object.keys(inputMap).sort((a, b) => b.length - a.length).join('|')})`)),
-            to: ctx => {
+            from: new RegExp(
+              normalizePath(
+                `/${base}/(${Object.keys(inputMap)
+                  .sort((a, b) => b.length - a.length)
+                  .join('|')})`,
+              ),
+            ),
+            to: (ctx) => {
               return normalizePath(`/${base}/${inputMap[ctx.match[1]]}`);
             },
           },
@@ -113,7 +132,8 @@ export function createMpaPlugin<
              * @see https://github.com/vitejs/vite/blob/main/packages/vite/src/node/server/middlewares/htmlFallback.ts#L13
              */
             to({ parsedUrl, request }: any) {
-              const rewritten = decodeURIComponent(parsedUrl.pathname) + 'index.html';
+              const rewritten =
+                decodeURIComponent(parsedUrl.pathname) + 'index.html';
 
               if (fs.existsSync(rewritten.replace(base, ''))) {
                 return rewritten;
@@ -149,14 +169,11 @@ export function createMpaPlugin<
         appType: 'mpa',
         clearScreen: config.clearScreen ?? false,
         optimizeDeps: {
-          entries: pages
-            .map(v => v.entry)
-            .filter(v => !!v) as string[],
+          entries: pages.map((v) => v.entry).filter((v) => !!v) as string[],
         },
         build: {
           rollupOptions: {
-            input: Object.values(inputMap)
-              .map(v => PREFIX + v), // Use PREFIX to distinguish these files from others.
+            input: Object.values(inputMap).map((v) => PREFIX + v), // Use PREFIX to distinguish these files from others.
           },
         },
       };
@@ -165,9 +182,14 @@ export function createMpaPlugin<
     configResolved(config) {
       resolvedConfig = config;
       if (verbose) {
-        const colorProcess = path => normalizePath(`${color.blue(`<${config.build.outDir}>/`)}${color.green(path)}`);
+        const colorProcess = (path) =>
+          normalizePath(
+            `${color.blue(`<${config.build.outDir}>/`)}${color.green(path)}`,
+          );
         const inputFiles = Object.values(inputMap).map(colorProcess);
-        console.log(`[${pluginName}]: Generated virtual files: \n${inputFiles.join('\n')}`);
+        console.log(
+          `[${pluginName}]: Generated virtual files: \n${inputFiles.join('\n')}`,
+        );
       }
     },
     /**
@@ -175,11 +197,11 @@ export function createMpaPlugin<
      */
     resolveId(id) {
       return id.startsWith(PREFIX)
-        /**
-         * Entry paths here must be absolute, otherwise it may cause problem on Windows. Closes #43
-         * @see https://github.com/vitejs/vite/issues/9771
-         */
-        ? path.resolve(resolvedConfig.root, id.slice(PREFIX.length))
+        ? /**
+           * Entry paths here must be absolute, otherwise it may cause problem on Windows. Closes #43
+           * @see https://github.com/vitejs/vite/issues/9771
+           */
+          path.resolve(resolvedConfig.root, id.slice(PREFIX.length))
         : undefined;
     },
     /**
@@ -197,11 +219,11 @@ export function createMpaPlugin<
         !page.entry
           ? templateContent
           : templateContent.replace(
-            bodyInject,
-            `<script type="module" src="${normalizePath(
-              `${page.entry}`,
-            )}"></script>\n</body>`,
-          ),
+              bodyInject,
+              `<script type="module" src="${normalizePath(
+                `${page.entry}`,
+              )}"></script>\n</body>`,
+            ),
         // Variables injection
         { ...resolvedConfig.env, ...page.data },
         // For error report
@@ -220,13 +242,9 @@ export function createMpaPlugin<
       const base = normalizePath(`/${config.base || '/'}/`);
 
       if (watchOptions) {
-        const {
-          events,
-          handler,
-          include,
-          excluded,
-        } = typeof watchOptions === 'function'
-            ? { handler: watchOptions } as WatchOptions<Event>
+        const { events, handler, include, excluded } =
+          typeof watchOptions === 'function'
+            ? ({ handler: watchOptions } as WatchOptions<Event>)
             : watchOptions;
 
         const isMatch = createFilter(include || /.*/, excluded);
@@ -237,9 +255,10 @@ export function createMpaPlugin<
 
           const file = replaceSlash(path.relative(config.root, filename));
 
-          verbose && console.log(
-            `[${pluginName}]: ${color.green(`file ${type}`)} - ${color.dim(file)}`,
-          );
+          verbose &&
+            console.log(
+              `[${pluginName}]: ${color.green(`file ${type}`)} - ${color.dim(file)}`,
+            );
 
           handler({
             type,
@@ -251,7 +270,7 @@ export function createMpaPlugin<
       }
 
       // Fully reload when template files change.
-      watcher.on('change', file => {
+      watcher.on('change', (file) => {
         if (
           file.endsWith('.html') &&
           tplSet.has(replaceSlash(path.relative(config.root, file)))
@@ -289,7 +308,9 @@ export function createMpaPlugin<
         res.statusCode = 200;
 
         // load file
-        const loadResult = await pluginContainer.load(path.resolve(config.root, fileName));
+        const loadResult = await pluginContainer.load(
+          path.resolve(config.root, fileName),
+        );
         if (!loadResult) {
           throw new Error(`Failed to load url ${fileName}`);
         }
@@ -297,9 +318,7 @@ export function createMpaPlugin<
         res.end(
           await transformIndexHtml(
             url,
-            typeof loadResult === 'string'
-              ? loadResult
-              : loadResult.code,
+            typeof loadResult === 'string' ? loadResult : loadResult.code,
             req.originalUrl,
           ),
         );
