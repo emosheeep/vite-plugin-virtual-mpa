@@ -5,4 +5,4 @@
   <a target="_self" href="/banana">banana</a>
   <span>|</span>
   <a target="_self" href="/strawberries">strawberries</a>
-</template>;
+</template>

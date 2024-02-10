@@ -12,22 +12,13 @@
     "esModuleInterop": true,
     "noImplicitAny": false,
     "outDir": "dist",
-    "lib": [
-      "esnext",
-    ],
+    "lib": ["esnext"],
     "baseUrl": ".",
     "rootDir": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     }
   },
-  "include": [
-    "**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

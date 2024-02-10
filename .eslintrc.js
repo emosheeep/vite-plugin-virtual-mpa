@@ -11,9 +11,11 @@ module.exports = defineConfig({
     es2021: true,
     node: true,
   },
+  plugins: ['prettier'],
   extends: [
     'plugin:vue/vue3-recommended',
     'standard',
+    'prettier',
     '@vue/typescript/recommended',
     'plugin:@typescript-eslint/recommended',
   ],
@@ -28,11 +30,14 @@ module.exports = defineConfig({
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/semi': ['error', 'always'],
     '@typescript-eslint/comma-dangle': ['error', 'always-multiline'],
-    '@typescript-eslint/space-before-function-paren': ['error', {
-      anonymous: 'never',
-      named: 'never',
-      asyncArrow: 'always',
-    }],
+    '@typescript-eslint/space-before-function-paren': [
+      'error',
+      {
+        anonymous: 'never',
+        named: 'never',
+        asyncArrow: 'always',
+      },
+    ],
     'vue/max-attributes-per-line': 'off',
   },
 });
