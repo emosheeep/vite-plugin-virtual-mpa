@@ -39,7 +39,7 @@ export function createMpaPlugin<
     previewRewrites,
     watchOptions,
     scanOptions,
-    transformTemplateHtml,
+    transformHtml,
   } = config;
   let resolvedConfig: ResolvedConfig;
 
@@ -212,8 +212,12 @@ export function createMpaPlugin<
       const page = virtualPageMap[id];
       if (!page) return null;
       let templateContent = fs.readFileSync(page.template || template, 'utf-8');
-      if (transformTemplateHtml) {
-        templateContent = transformTemplateHtml(templateContent, page);
+      /**
+       * Transform before building.
+       * @see https://github.com/emosheeep/vite-plugin-virtual-mpa/pull/56
+       */
+      if (typeof transformHtml === 'function') {
+        templateContent = transformHtml(templateContent, page);
       }
       return ejs.render(
         !page.entry

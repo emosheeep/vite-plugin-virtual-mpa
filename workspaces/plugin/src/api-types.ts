@@ -143,7 +143,7 @@ export interface MpaOptions<
   /**
    * Dedicated hook for transforming template HTML.
    */
-  transformTemplateHtml?: (html: string, page: Page) => string;
+  transformHtml?: (html: string, page: Page) => string;
   /**
    * Whether to minify html file. Powered by [html-minify-terser](https://github.com/terser/html-minifier-terser).
    * @default false
