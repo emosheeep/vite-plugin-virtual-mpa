@@ -117,6 +117,9 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1(@types/node@18.19.15)
     devDependencies:
+      '@changesets/cli':
+        specifier: ^2.27.1
+        version: 2.27.1
       '@types/ejs':
         specifier: ^3.1.5
         version: 3.1.5
