@@ -6,6 +6,12 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
   "description": "Out-of-box MPA plugin for Vite, with html template engine and virtual files support.",
   "homepage": "https://github.com/emosheeep/vite-plugin-virtual-mpa/tree/master/workspaces/plugin#readme",
   "repository": {
