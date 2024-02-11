@@ -3,13 +3,14 @@
   "version": "1.10.0",
   "license": "MIT",
   "author": "秦旭洋",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "description": "Out-of-box MPA plugin for Vite, with html template engine and virtual files support.",
