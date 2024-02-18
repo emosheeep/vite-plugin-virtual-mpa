@@ -1,3 +1,4 @@
+# https://github.com/changesets/action
 name: Release Package
 
 on:
@@ -14,7 +15,7 @@ permissions:
 
 jobs:
   release-package:
-    if: github.event.pull_request.merged
+    if: github.event.pull_request.merged || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -26,13 +27,6 @@ jobs:
           version: 8
           run_install: true
 
-      - name: Version Package
-        id: versioning
-        run: |
-          npx changeset version
-          echo "::set-output name=tag::v$(node -pe "require('./package.json').version")"
-          git restore .
-
       # consume changesets and create pr if it exists, otherwise publish package
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
@@ -41,5 +35,5 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
           publish: npx changeset publish
-          commit: "chore: release ${{ steps.versioning.outputs.tag }}"
-          title: "chore: release ${{ steps.versioning.outputs.tag }}"
+          commit: "chore: versioning package"
+          title: "chore:versioning package"
