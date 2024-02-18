@@ -2,7 +2,7 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
-import { createMpaPlugin, createPages } from 'vite-plugin-virtual-mpa';
+import { createMpaPlugin, createPages } from '../plugin/src/index';
 
 const base = '/'; // You can change whatever you want
 

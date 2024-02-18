@@ -1,5 +1,7 @@
 {
   "name": "vite-plugin-virtual-mpa-demo",
+  "version": "0.0.0",
+  "type": "module",
   "private": true,
   "description": "Examples for vite-plugin-virtual-mpa.",
   "repository": {
@@ -19,7 +21,6 @@
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^3.1.0",
     "vite": "^5.1.1",
-    "vite-plugin-virtual-mpa": "workspace:*",
     "vue": "^3.4.18"
   }
 }

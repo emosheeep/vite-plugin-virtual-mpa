@@ -1,5 +1,6 @@
 {
   "name": "@emo/vite-plugin",
+  "version": "0.0.0",
   "private": true,
   "description": "This is a monorepo for vite-plugin-mpa",
   "keywords": [
@@ -50,6 +51,5 @@
   "simple-git-hooks": {
     "commit-msg": "npx commitlint -e",
     "pre-commit": "npx lint-staged && npx tsc --noEmit"
-  },
-  "version": "0.0.0"
+  }
 }

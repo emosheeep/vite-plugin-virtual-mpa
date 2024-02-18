@@ -1,5 +1,11 @@
 # vite-plugin-virtual-mpa
 
+## 1.10.1
+
+### Patch Changes
+
+- fix: The CJS build of Vite's Node API is deprecated warning
+
 ## 1.10.0
 
 ### Minor Changes
