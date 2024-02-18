@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "declaration": true,
+    "declarationMap": false,
+    "declarationDir": "types",
     "skipLibCheck": true,
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
@@ -19,6 +22,6 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["**/*.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
