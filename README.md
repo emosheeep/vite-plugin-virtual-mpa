@@ -6,7 +6,7 @@
 ![license](https://img.shields.io/npm/l/vite-plugin-virtual-mpa)
 [![install size](https://packagephobia.com/badge?p=vite-plugin-virtual-mpa)](https://packagephobia.com/result?p=vite-plugin-virtual-mpa)
 
-Out-of-box MPA plugin for Vite 📦, with html template engine and virtual files support, generate multiple files using only one template.
+Out-of-box MPA plugin for Vite 📦, with html template engine and virtual files support, generate multiple entries using only one template.
 
 English | [中文](./README.zh_CN.md)
 
@@ -17,13 +17,23 @@ English | [中文](./README.zh_CN.md)
 - 🛠️ Customize the path of generated files, generate multiple files using only one template.
 - 🛠️ MPA support and History Fallback API for both dev and preview server.
 
+## Quick Start
+
+View the [cloud ide](https://stackblitz.com/~/github.com/emosheeep/vite-plugin-virtual-mpa) on stackblitz.com, and setup with the following scripts:
+
+```sh
+pnpm install
+cd example
+pnpm serve/build
+```
+
+Then you can try whatever you want.
+
 ## Usage
 
 ```sh
 pnpm add -D vite-plugin-virtual-mpa # or npm/yarn
 ```
-
-> **Tips**: You can clone the repo and start `example` project or view [codesandbox](https://codesandbox.io/p/sandbox/vite-plugin-virtual-mpa-0djylc) to have a quick start. A local exploring is preferred.
 
 ```ts
 // vite.config.ts
