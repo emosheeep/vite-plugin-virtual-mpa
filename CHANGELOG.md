@@ -1,5 +1,11 @@
 # vite-plugin-virtual-mpa
 
+## 1.11.0
+
+### Minor Changes
+
+- feat: Support configuring response headers for development environment server
+
 ## 1.10.1
 
 ### Patch Changes

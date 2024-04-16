@@ -313,6 +313,9 @@ export function createMpaPlugin<
           return next(); // This allows vite handling unmatched paths.
         }
 
+        Object.entries(config?.server?.headers || {}).forEach(([key, value]) => {
+          res.setHeader(key, value!);
+        });
         /**
          * The following 2 lines fixed #12.
          * When using cypress for e2e testing, we should manually set response header and status code.
