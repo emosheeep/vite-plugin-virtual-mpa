@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-virtual-mpa",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "author": "秦旭洋 <emosheep@qq.com>",
   "license": "MIT",
   "description": "Out-of-box MPA plugin for Vite, with html template engine and virtual files support.",

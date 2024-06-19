@@ -1,5 +1,12 @@
 # vite-plugin-virtual-mpa
 
+## 1.12.0
+
+### Minor Changes
+
+- 59cfcce: fix: Prevent the Vite dev server from crashing when rendering EJS templates fails
+- chore: upgrade dependencies.
+
 ## 1.11.0
 
 ### Minor Changes
