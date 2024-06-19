@@ -313,9 +313,11 @@ export function createMpaPlugin<
           return next(); // This allows vite handling unmatched paths.
         }
 
-        Object.entries(config?.server?.headers || {}).forEach(([key, value]) => {
-          res.setHeader(key, value!);
-        });
+        Object.entries(config?.server?.headers || {}).forEach(
+          ([key, value]) => {
+            res.setHeader(key, value!);
+          },
+        );
         /**
          * The following 2 lines fixed #12.
          * When using cypress for e2e testing, we should manually set response header and status code.
@@ -325,20 +327,24 @@ export function createMpaPlugin<
         res.statusCode = 200;
 
         // load file
-        const loadResult = await pluginContainer.load(
-          path.resolve(config.root, fileName),
-        );
-        if (!loadResult) {
-          throw new Error(`Failed to load url ${fileName}`);
-        }
+        try {
+          const loadResult = await pluginContainer.load(
+            path.resolve(config.root, fileName),
+          );
+          if (!loadResult) {
+            return next(new Error(`Failed to load url ${fileName}`));
+          }
 
-        res.end(
-          await transformIndexHtml(
-            url,
-            typeof loadResult === 'string' ? loadResult : loadResult.code,
-            req.originalUrl,
-          ),
-        );
+          res.end(
+            await transformIndexHtml(
+              url,
+              typeof loadResult === 'string' ? loadResult : loadResult.code,
+              req.originalUrl,
+            ),
+          );
+        } catch (e) {
+          next(e);
+        }
       });
     },
     configurePreviewServer(server) {
