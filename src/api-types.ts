@@ -9,11 +9,12 @@ import type {
 
 export type AllowedEvent = 'add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir';
 
+export type AllowedExtensions = 'ejs' | 'html';
 export type TplStr<T extends string> = T extends `/${infer P}`
   ? TplStr<P>
-  : T extends `${infer Q}.html`
+  : T extends `${infer Q}.${AllowedExtensions}`
     ? TplStr<Q>
-    : `${T}.html`;
+    : `${T}.${AllowedExtensions}`;
 
 export interface Page<
   Name extends string = string,
