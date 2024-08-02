@@ -27,8 +27,8 @@ export interface Page<
    */
   name: Name extends `${string}/${string}` ? never : Name;
   /**
-   * Relative path to the output directory, which should end with .html and not startWith '/'
-   * @default `${name}.html`
+   * Relative path to the output directory, which should end with .ejs or .html and not startWith '/'
+   * @default `${name}.${'ejs' | 'html'}`
    */
   filename?: TplStr<Filename>;
   /**
@@ -36,7 +36,7 @@ export interface Page<
    */
   template?: TplStr<Tpl>;
   /**
-   * Entry file that will append to body, which you should remove from the html template file.
+   * Entry file that will append to body, which you should remove from the EJS template file.
    * It must always start with `'/'` which represents your project root directory.
    */
   entry?: `/${string}`;
