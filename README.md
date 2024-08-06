@@ -100,7 +100,7 @@ interface MpaOptions {
    * default template file
    * @default index.html
    */
-  template?: `${string}.html`,
+  template?: `${string}.${'ejs' | 'html'}`,
   /**
    * Configure your rewrite rules, only proceed html requests.
    * @see https://github.com/bripkens/connect-history-api-fallback
