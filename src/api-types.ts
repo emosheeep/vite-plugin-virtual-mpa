@@ -9,12 +9,13 @@ import type {
 
 export type AllowedEvent = 'add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir';
 
-export type AllowedExtensions = 'ejs' | 'html';
-export type TplStr<T extends string> = T extends `/${infer P}`
-  ? TplStr<P>
-  : T extends `${infer Q}.${AllowedExtensions}`
-    ? TplStr<Q>
-    : `${T}.${AllowedExtensions}`;
+export type ExtStr<E extends string, T extends string> = T extends `/${infer P}`
+  ? ExtStr<E, P>
+  : T extends `${infer Q}.${E}`
+    ? ExtStr<E, Q>
+    : `${T}.${E}`;
+export type FileStr<T extends string> = ExtStr<'html', T>;
+export type TplStr<T extends string> = ExtStr<'ejs' | 'html', T>;
 
 export interface Page<
   Name extends string = string,
@@ -27,10 +28,10 @@ export interface Page<
    */
   name: Name extends `${string}/${string}` ? never : Name;
   /**
-   * Relative path to the output directory, which should end with .ejs or .html and not startWith '/'
-   * @default `${name}.${'ejs' | 'html'}`
+   * Relative path to the output directory, which should end with .html and not startWith '/'
+   * @default `${name}.html`
    */
-  filename?: TplStr<Filename>;
+  filename?: FileStr<Filename>;
   /**
    * **Higher priority template file**, which will overwrite the default template.
    */
