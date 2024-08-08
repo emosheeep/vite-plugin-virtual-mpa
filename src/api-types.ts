@@ -9,6 +9,9 @@ import type {
 
 export type AllowedEvent = 'add' | 'unlink' | 'change' | 'unlinkDir' | 'addDir';
 
+/**
+ * Ensure string follow the extension convention
+ */
 export type ExtStr<E extends string, T extends string> = T extends `/${infer P}`
   ? ExtStr<E, P>
   : T extends `${infer Q}.${E}`

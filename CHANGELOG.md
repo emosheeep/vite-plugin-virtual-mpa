@@ -1,5 +1,12 @@
 # vite-plugin-virtual-mpa
 
+## 1.12.1
+
+### Patch Changes
+
+- 0dd3b4b: feat: Allow EJS extension for template files.
+- chore: upgrade ecosystem dependencies.
+
 ## 1.12.0
 
 ### Minor Changes
