@@ -102,6 +102,22 @@ export function createMpaPlugin<
 
     if (rewrites === false) return; // Disable rewriting if passing false, closed #44.
 
+    const originalRegex = new RegExp(
+      normalizePath(
+        `/${base}/(${Object.keys(inputMap)
+          .sort((a, b) => b.length - a.length)
+          .join('|')})`,
+      ),
+    );
+
+    const adjustedRegex = new RegExp(
+      normalizePath(
+        `/${base}/(${Object.keys(inputMap)
+          .sort((a, b) => b.length - a.length)
+          .join('|')})`,
+      ) + '(\\.html?|$)', // ensures an overwrite is only carried out on paths that end in .html, .htm, or the end of string
+    );
+
     middlewares.use(
       // @ts-ignore
       history({
@@ -114,13 +130,8 @@ export function createMpaPlugin<
              * Put built-in matching rules in order of length so that to preferentially match longer paths.
              * Closed #52.
              */
-            from: new RegExp(
-              normalizePath(
-                `/${base}/(${Object.keys(inputMap)
-                  .sort((a, b) => b.length - a.length)
-                  .join('|')})`,
-              ),
-            ),
+            from: originalRegex,
+            // from: adjustedRegex,
             to: (ctx) => {
               return normalizePath(`/${base}/${inputMap[ctx.match[1]]}`);
             },
