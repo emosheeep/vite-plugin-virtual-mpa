@@ -2,6 +2,7 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
+import color from 'picocolors';
 import { createMpaPlugin, createPages } from '../src/index';
 
 const base = '/'; // You can change whatever you want
@@ -74,6 +75,18 @@ export default defineConfig({
         };
       },
     }),
+    // Used to log incoming requests for debugging.
+    {
+      name: 'requestLogger',
+      configurePreviewServer(server) {
+        server.middlewares.use((req, res, next) => {
+          console.log(
+            `[${color.blue('request')}]: ${color.green(req.method)} ${req.url} ${color.yellow(`(Accept: ${req.headers.accept})`)}`,
+          );
+          next();
+        });
+      },
+    },
   ],
   build: { sourcemap: true },
   server: { port: 5173, open: true },
